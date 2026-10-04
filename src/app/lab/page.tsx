@@ -9,7 +9,7 @@ import { ExperimentCard } from "@/features/lab/experiment-card";
 export const metadata: Metadata = {
   title: "Lab",
   description:
-    "A collection of finished Three.js and WebGL studies exploring shaders, procedural geometry, motion, and interaction.",
+    "Three focused Three.js studies exploring mapped worlds, spatial media, and responsive surfaces.",
 };
 
 export default function LabPage() {
@@ -22,22 +22,19 @@ export default function LabPage() {
           <Container>
             <div className="grid gap-12 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <p className="font-mono text-xs uppercase tracking-[0.16em] text-orange">
+                <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-orange">
                   Lab / Creative Studies
                 </p>
               </div>
 
               <div className="lg:col-span-8">
                 <h1 className="max-w-4xl text-5xl font-medium leading-[0.94] tracking-[-0.05em] sm:text-6xl lg:text-8xl">
-                  Experiments that taught me how things move.
+                  Three studies. Three distinct ideas.
                 </h1>
 
                 <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/65">
-                  Five focused Three.js studies first built while learning
-                  creative coding and revisited later with stronger engineering
-                  instincts. They are deliberately small: each one explores a
-                  specific visual or interaction idea rather than pretending to
-                  be a product.
+                  A small set of interactive graphics experiments exploring
+                  worlds, spatial media, and responsive surfaces.
                 </p>
               </div>
             </div>
@@ -55,10 +52,6 @@ export default function LabPage() {
                 />
               ))}
             </div>
-
-            <p className="mt-8 max-w-2xl font-mono text-[10px] uppercase leading-6 tracking-[0.14em] text-paper/40">
-              Orbital Signals / Signal Theatre / Displacement Field / Noise Field / Scroll Studies
-            </p>
           </Container>
         </section>
       </main>
