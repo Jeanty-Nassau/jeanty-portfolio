@@ -3,6 +3,7 @@
 import {
   MeshReflectorMaterial,
   OrbitControls,
+  PerspectiveCamera,
   useTexture,
   useVideoTexture,
 } from "@react-three/drei";
@@ -18,9 +19,7 @@ import * as THREE from "three";
 type StudyId =
   | "orbital-signals"
   | "signal-theatre"
-  | "displacement-field"
-  | "noise-field"
-  | "scroll-studies";
+  | "displacement-field";
 
 const RAW_ASSET_BASE =
   "https://raw.githubusercontent.com/Jeanty-Nassau";
@@ -30,6 +29,13 @@ const EARTH_TEXTURE =
 
 const CINEMA_ASSET_BASE =
   `${RAW_ASSET_BASE}/Interactive-CylinderCinema-ThreeJS/main/static`;
+
+const CINEMA_SCREENS = [
+  "Castle",
+  "House",
+  "Sky",
+  "Building",
+] as const;
 
 const studies: Array<{
   id: StudyId;
@@ -43,40 +49,24 @@ const studies: Array<{
     title: "Orbital Signals",
     eyebrow: "THREE.JS STUDY / 01",
     description:
-      "An interactive Earth study built around texture mapping, atmospheric falloff, a procedural star field, and a quiet orbital camera.",
-    hint: "Drag to orbit · Scroll to zoom · The Earth spins on its own.",
+      "A stylised Earth study built from the original world map, atmospheric glow, orbital graphics, and a slow passive rotation.",
+    hint: "Drag to orbit · Scroll to zoom.",
   },
   {
     id: "signal-theatre",
     title: "Signal Theatre",
     eyebrow: "THREE.JS STUDY / 02",
     description:
-      "A cylindrical cinema rebuilt with the original castle, house, sky, building, and floor assets from the source project.",
-    hint: "Drag to look around · Use the screen controls to rotate the theatre.",
+      "A cylindrical cinema using the original project media, framed one screen at a time from a seated viewing perspective.",
+    hint: "Switch screens · Zoom in or out.",
   },
   {
     id: "displacement-field",
     title: "Displacement Field",
     eyebrow: "THREE.JS STUDY / 03",
     description:
-      "A surface study using displacement, pointer influence, light, and depth to turn a simple plane into a responsive terrain.",
+      "A responsive surface study using displacement, pointer influence, light, and depth.",
     hint: "Move the pointer to alter the field.",
-  },
-  {
-    id: "noise-field",
-    title: "Noise Field",
-    eyebrow: "THREE.JS STUDY / 04",
-    description:
-      "A procedural geometry study driven by continuous noise and moving light.",
-    hint: "Move the pointer to shift the field.",
-  },
-  {
-    id: "scroll-studies",
-    title: "Scroll Studies",
-    eyebrow: "THREE.JS STUDY / 05",
-    description:
-      "A motion study combining simple forms, particles, parallax, and scroll-like scene progression.",
-    hint: "Scroll over the canvas to move through the forms.",
   },
 ];
 
@@ -87,10 +77,10 @@ function seededUnit(index: number, salt: number) {
 
 function Stars() {
   const positions = useMemo(() => {
-    const values = new Float32Array(950 * 3);
+    const values = new Float32Array(1100 * 3);
 
-    for (let index = 0; index < 950; index += 1) {
-      const radius = 14 + seededUnit(index, 1) * 34;
+    for (let index = 0; index < 1100; index += 1) {
+      const radius = 14 + seededUnit(index, 1) * 36;
       const theta = seededUnit(index, 2) * Math.PI * 2;
       const phi = Math.acos(2 * seededUnit(index, 3) - 1);
 
@@ -118,9 +108,10 @@ function Stars() {
           args={[positions, 3]}
         />
       </bufferGeometry>
+
       <pointsMaterial
         color="#f7f7f2"
-        size={0.04}
+        size={0.035}
         transparent
         opacity={0.72}
         sizeAttenuation
@@ -129,26 +120,99 @@ function Stars() {
   );
 }
 
-function OrbitalSignals() {
-  const sourceTexture = useTexture(EARTH_TEXTURE);
-  const texture = useMemo(() => {
-    const clone = sourceTexture.clone();
-    clone.colorSpace = THREE.SRGBColorSpace;
-    clone.anisotropy = 8;
-    clone.needsUpdate = true;
-    return clone;
-  }, [sourceTexture]);
-  const earth = useRef<THREE.Mesh>(null);
+const earthVertex = `
+  varying vec2 vUv;
+  varying vec3 vNormal;
 
-  useEffect(() => {
-    return () => {
-      texture.dispose();
-    };
-  }, [texture]);
+  void main() {
+    vUv = uv;
+    vNormal = normalize(normalMatrix * normal);
+
+    gl_Position =
+      projectionMatrix *
+      modelViewMatrix *
+      vec4(position, 1.0);
+  }
+`;
+
+const earthFragment = `
+  uniform sampler2D uMap;
+
+  varying vec2 vUv;
+  varying vec3 vNormal;
+
+  void main() {
+    vec3 source = texture2D(uMap, vUv).rgb;
+
+    float luminance =
+      dot(source, vec3(0.299, 0.587, 0.114));
+
+    float landMask = smoothstep(
+      0.24,
+      0.68,
+      luminance + (source.g - source.b) * 0.22
+    );
+
+    vec3 ocean = vec3(0.012, 0.035, 0.18);
+    vec3 landLow = vec3(0.12, 0.28, 1.0);
+    vec3 landHigh = vec3(0.92, 0.95, 1.0);
+
+    vec3 land = mix(
+      landLow,
+      landHigh,
+      smoothstep(0.28, 0.84, luminance)
+    );
+
+    vec3 color = mix(ocean, land, landMask);
+
+    vec3 normal = normalize(vNormal);
+
+    float light =
+      max(dot(normal, normalize(vec3(0.45, 0.28, 1.0))), 0.0);
+
+    color *= 0.42 + light * 0.88;
+
+    float night = pow(1.0 - light, 2.4);
+    float citySignal =
+      smoothstep(0.7, 0.94, luminance) * night;
+
+    color +=
+      vec3(1.0, 0.34, 0.03) *
+      citySignal *
+      2.2;
+
+    float rim =
+      pow(1.0 - abs(dot(normal, vec3(0.0, 0.0, 1.0))), 3.0);
+
+    color +=
+      vec3(0.04, 0.2, 1.0) *
+      rim *
+      1.1;
+
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+function OrbitalSignals() {
+  const texture = useTexture(EARTH_TEXTURE);
+  const earth = useRef<THREE.Mesh>(null);
+  const orbitRig = useRef<THREE.Group>(null);
+
+  const uniforms = useMemo(
+    () => ({
+      uMap: { value: texture },
+    }),
+    [texture],
+  );
 
   useFrame((_, delta) => {
     if (earth.current) {
-      earth.current.rotation.y += delta * 0.05;
+      earth.current.rotation.y += delta * 0.045;
+    }
+
+    if (orbitRig.current) {
+      orbitRig.current.rotation.y += delta * 0.11;
+      orbitRig.current.rotation.z += delta * 0.025;
     }
   });
 
@@ -158,29 +222,68 @@ function OrbitalSignals() {
 
       <group rotation={[0, 0, THREE.MathUtils.degToRad(-23.4)]}>
         <mesh ref={earth}>
-          <sphereGeometry args={[2.05, 96, 96]} />
-          <meshStandardMaterial
-            map={texture}
-            roughness={0.82}
-            metalness={0.02}
+          <sphereGeometry args={[2.05, 128, 128]} />
+          <shaderMaterial
+            vertexShader={earthVertex}
+            fragmentShader={earthFragment}
+            uniforms={uniforms}
           />
         </mesh>
 
-        <mesh scale={1.075}>
+        <mesh scale={1.035}>
+          <sphereGeometry args={[2.05, 48, 48]} />
+          <meshBasicMaterial
+            color="#91a7ff"
+            wireframe
+            transparent
+            opacity={0.07}
+          />
+        </mesh>
+
+        <mesh scale={1.09}>
           <sphereGeometry args={[2.05, 72, 72]} />
           <meshBasicMaterial
             color="#1847ff"
             transparent
-            opacity={0.11}
+            opacity={0.12}
             side={THREE.BackSide}
             blending={THREE.AdditiveBlending}
           />
         </mesh>
       </group>
 
-      <ambientLight intensity={0.6} />
-      <directionalLight position={[6, 4, 7]} intensity={2.2} />
-      <pointLight position={[-6, 1.5, 3]} intensity={20} color="#1847ff" />
+      <group ref={orbitRig}>
+        <mesh rotation={[Math.PI / 2.25, 0.1, 0.2]}>
+          <torusGeometry args={[2.8, 0.012, 10, 220]} />
+          <meshBasicMaterial
+            color="#ff991c"
+            transparent
+            opacity={0.72}
+          />
+        </mesh>
+
+        <mesh rotation={[1.0, 0.4, 0.7]}>
+          <torusGeometry args={[3.25, 0.006, 8, 220]} />
+          <meshBasicMaterial
+            color="#91a7ff"
+            transparent
+            opacity={0.38}
+          />
+        </mesh>
+
+        <mesh position={[2.65, 0.85, 0]}>
+          <sphereGeometry args={[0.055, 18, 18]} />
+          <meshBasicMaterial color="#ff991c" />
+        </mesh>
+      </group>
+
+      <ambientLight intensity={0.34} />
+      <directionalLight position={[6, 4, 7]} intensity={1.7} />
+      <pointLight
+        position={[-6, 1.5, 3]}
+        intensity={18}
+        color="#1847ff"
+      />
 
       <OrbitControls
         makeDefault
@@ -190,31 +293,19 @@ function OrbitalSignals() {
         maxDistance={10}
         minPolarAngle={Math.PI * 0.2}
         maxPolarAngle={Math.PI * 0.8}
-        autoRotate={false}
         target={[0, 0, 0]}
       />
     </>
   );
 }
 
-function TheatrePointerControls({
-  theatre,
+function SignalTheatre({
+  screenIndex,
+  fov,
 }: {
-  theatre: React.RefObject<THREE.Group | null>;
+  screenIndex: number;
+  fov: number;
 }) {
-  const { pointer } = useThree();
-
-  useFrame(() => {
-    if (!theatre.current) return;
-
-    theatre.current.rotation.x +=
-      (pointer.y * 0.08 - theatre.current.rotation.x) * 0.04;
-  });
-
-  return null;
-}
-
-function SignalTheatre({ turn }: { turn: number }) {
   const castle = useVideoTexture(
     `${CINEMA_ASSET_BASE}/castleGif.mp4`,
     {
@@ -274,73 +365,94 @@ function SignalTheatre({ turn }: { turn: number }) {
   }, [building, floorTexture]);
 
   const theatre = useRef<THREE.Group>(null);
+  const screenArc = Math.PI / 3.2;
 
   useFrame(() => {
     if (!theatre.current) return;
 
-    const target = turn * (Math.PI / 2);
+    const target = -screenIndex * (Math.PI / 2);
+
     theatre.current.rotation.y +=
-      (target - theatre.current.rotation.y) * 0.06;
+      (target - theatre.current.rotation.y) * 0.085;
   });
 
   const textures = [castle, house, sky, building];
 
   return (
     <>
-      <TheatrePointerControls theatre={theatre} />
+      <PerspectiveCamera
+        makeDefault
+        position={[0, 0.38, 0]}
+        rotation={[-0.075, 0, 0]}
+        fov={fov}
+        near={0.1}
+        far={80}
+      />
 
       <group ref={theatre}>
-        {textures.map((texture, index) => (
-          <mesh key={index}>
-            <cylinderGeometry
-              args={[
-                4.2,
-                4.2,
-                2.45,
-                96,
-                1,
-                true,
-                index * (Math.PI / 2),
-                Math.PI / 2 - 0.06,
-              ]}
-            />
-            {texture ? (
+        {textures.map((texture, index) => {
+          const thetaStart =
+            Math.PI -
+            screenArc / 2 +
+            index * (Math.PI / 2);
+
+          return (
+            <mesh key={index}>
+              <cylinderGeometry
+                args={[
+                  5,
+                  5,
+                  2.8,
+                  96,
+                  1,
+                  true,
+                  thetaStart,
+                  screenArc,
+                ]}
+              />
+
               <meshBasicMaterial
                 map={texture}
                 side={THREE.BackSide}
                 toneMapped={false}
               />
-            ) : (
-              <meshBasicMaterial
-                color={index % 2 === 0 ? "#1847ff" : "#1036cc"}
-                side={THREE.BackSide}
-              />
-            )}
-          </mesh>
-        ))}
+            </mesh>
+          );
+        })}
       </group>
 
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1.23, 0]}
+        position={[0, -1.4, 0]}
       >
-        <circleGeometry args={[4, 96]} />
+        <circleGeometry args={[4.95, 96]} />
+
         <MeshReflectorMaterial
           map={floorTexture}
-          color="#6e7482"
-          roughness={0.55}
-          metalness={0.2}
-          mirror={0.35}
+          color="#626878"
+          roughness={0.58}
+          metalness={0.16}
+          mirror={0.3}
           blur={[220, 90]}
           resolution={512}
           mixBlur={1}
-          mixStrength={0.55}
+          mixStrength={0.5}
         />
       </mesh>
 
-      <ambientLight intensity={0.24} />
-      <pointLight position={[-1.5, 1.8, 0]} intensity={20} color="#1847ff" />
-      <pointLight position={[1.8, 1.2, 0.5]} intensity={12} color="#ff991c" />
+      <ambientLight intensity={0.2} />
+
+      <pointLight
+        position={[-1.5, 1.8, 0]}
+        intensity={16}
+        color="#1847ff"
+      />
+
+      <pointLight
+        position={[1.8, 1.1, 0.5]}
+        intensity={9}
+        color="#ff991c"
+      />
     </>
   );
 }
@@ -352,15 +464,27 @@ const waveVertex = `
 
   void main() {
     vec3 p = position;
-    float radial = distance(uv, vec2(0.5) + uPointer * 0.08);
-    float waveA = sin((p.x * 2.4) + uTime * 1.3) * 0.16;
-    float waveB = cos((p.y * 3.0) - uTime * 0.95) * 0.12;
-    float ripple = sin(radial * 28.0 - uTime * 2.3) * 0.09;
+    float radial = distance(
+      uv,
+      vec2(0.5) + uPointer * 0.08
+    );
+
+    float waveA =
+      sin((p.x * 2.4) + uTime * 1.3) * 0.16;
+
+    float waveB =
+      cos((p.y * 3.0) - uTime * 0.95) * 0.12;
+
+    float ripple =
+      sin(radial * 28.0 - uTime * 2.3) * 0.09;
 
     p.z += waveA + waveB + ripple;
     vHeight = p.z;
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+    gl_Position =
+      projectionMatrix *
+      modelViewMatrix *
+      vec4(p, 1.0);
   }
 `;
 
@@ -368,12 +492,17 @@ const waveFragment = `
   varying float vHeight;
 
   void main() {
-    float mixAmount = smoothstep(-0.3, 0.3, vHeight);
+    float mixAmount =
+      smoothstep(-0.3, 0.3, vHeight);
+
     vec3 low = vec3(0.04, 0.08, 0.22);
     vec3 high = vec3(0.09, 0.28, 1.0);
-    vec3 color = mix(low, high, mixAmount);
 
-    gl_FragColor = vec4(color, 1.0);
+    vec3 color =
+      mix(low, high, mixAmount);
+
+    gl_FragColor =
+      vec4(color, 1.0);
   }
 `;
 
@@ -384,13 +513,20 @@ function DisplacementField() {
 
   useFrame((state) => {
     if (material.current) {
-      material.current.uniforms.uTime.value = state.clock.elapsedTime;
-      material.current.uniforms.uPointer.value.set(pointer.x, pointer.y);
+      material.current.uniforms.uTime.value =
+        state.clock.elapsedTime;
+
+      material.current.uniforms.uPointer.value.set(
+        pointer.x,
+        pointer.y,
+      );
     }
 
     if (mesh.current) {
       mesh.current.rotation.z +=
-        ((pointer.x * 0.12) - mesh.current.rotation.z) * 0.04;
+        (pointer.x * 0.12 -
+          mesh.current.rotation.z) *
+        0.04;
     }
   });
 
@@ -409,194 +545,121 @@ function DisplacementField() {
           fragmentShader={waveFragment}
           uniforms={{
             uTime: { value: 0 },
-            uPointer: { value: new THREE.Vector2() },
+            uPointer: {
+              value: new THREE.Vector2(),
+            },
           }}
           wireframe
         />
       </mesh>
 
-      <pointLight position={[3, 4, 3]} intensity={18} color="#1847ff" />
-      <pointLight position={[-3, -1, 2]} intensity={10} color="#ff991c" />
-    </>
-  );
-}
-
-const noiseVertex = `
-  uniform float uTime;
-  uniform vec2 uPointer;
-  varying float vHeight;
-
-  float field(vec2 p) {
-    float a = sin(p.x * 1.4 + uTime * 0.8);
-    float b = cos(p.y * 1.8 - uTime * 0.55);
-    float c = sin((p.x + p.y) * 0.85 + uTime * 0.4);
-    return (a + b + c) / 3.0;
-  }
-
-  void main() {
-    vec3 p = position;
-    p.z += field(p.xy + uPointer * 0.5) * 0.7;
-    vHeight = p.z;
-
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-  }
-`;
-
-const noiseFragment = `
-  varying float vHeight;
-
-  void main() {
-    float t = smoothstep(-0.75, 0.75, vHeight);
-    vec3 a = vec3(0.03, 0.03, 0.04);
-    vec3 b = vec3(1.0, 0.6, 0.11);
-
-    gl_FragColor = vec4(mix(a, b, t), 1.0);
-  }
-`;
-
-function NoiseField() {
-  const material = useRef<THREE.ShaderMaterial>(null);
-  const { pointer } = useThree();
-
-  useFrame((state) => {
-    if (!material.current) return;
-
-    material.current.uniforms.uTime.value = state.clock.elapsedTime;
-    material.current.uniforms.uPointer.value.set(pointer.x, pointer.y);
-  });
-
-  return (
-    <mesh
-      rotation={[-1.03, 0, 0]}
-      position={[1.1, -1.2, -0.4]}
-    >
-      <planeGeometry args={[10, 8, 150, 110]} />
-
-      <shaderMaterial
-        ref={material}
-        vertexShader={noiseVertex}
-        fragmentShader={noiseFragment}
-        uniforms={{
-          uTime: { value: 0 },
-          uPointer: { value: new THREE.Vector2() },
-        }}
-        wireframe
+      <pointLight
+        position={[3, 4, 3]}
+        intensity={18}
+        color="#1847ff"
       />
-    </mesh>
-  );
-}
 
-function ScrollStudies() {
-  const group = useRef<THREE.Group>(null);
-  const { gl, pointer } = useThree();
-  const targetPhase = useRef(0);
-  const currentPhase = useRef(0);
-
-  useEffect(() => {
-    const element = gl.domElement;
-
-    const wheel = (event: WheelEvent) => {
-      event.preventDefault();
-
-      targetPhase.current = THREE.MathUtils.clamp(
-        targetPhase.current + Math.sign(event.deltaY),
-        0,
-        2,
-      );
-    };
-
-    element.addEventListener("wheel", wheel, { passive: false });
-
-    return () => {
-      element.removeEventListener("wheel", wheel);
-    };
-  }, [gl]);
-
-  useFrame((_, delta) => {
-    if (!group.current) return;
-
-    currentPhase.current +=
-      (targetPhase.current - currentPhase.current) * 0.08;
-
-    group.current.position.y = currentPhase.current * 2.6;
-    group.current.position.x +=
-      (pointer.x * 0.35 - group.current.position.x) * 0.04;
-
-    group.current.children.forEach((child, index) => {
-      child.rotation.x += delta * (0.08 + index * 0.025);
-      child.rotation.y += delta * (0.11 + index * 0.02);
-    });
-  });
-
-  return (
-    <group ref={group}>
-      <mesh position={[2.0, 0, 0]}>
-        <torusGeometry args={[0.85, 0.28, 24, 80]} />
-        <meshToonMaterial color="#91a7ff" />
-      </mesh>
-
-      <mesh position={[-1.8, -2.6, 0]}>
-        <coneGeometry args={[0.9, 1.8, 40]} />
-        <meshToonMaterial color="#f7f7f2" />
-      </mesh>
-
-      <mesh position={[2.0, -5.2, 0]}>
-        <torusKnotGeometry args={[0.65, 0.2, 120, 18]} />
-        <meshToonMaterial color="#ff991c" />
-      </mesh>
-    </group>
+      <pointLight
+        position={[-3, -1, 2]}
+        intensity={10}
+        color="#ff991c"
+      />
+    </>
   );
 }
 
 function StudyScene({
   study,
-  cinemaTurn,
+  cinemaScreen,
+  cinemaFov,
 }: {
   study: StudyId;
-  cinemaTurn: number;
+  cinemaScreen: number;
+  cinemaFov: number;
 }) {
   return (
     <>
-      <ambientLight intensity={0.45} />
-
-      {study === "orbital-signals" && <OrbitalSignals />}
-      {study === "signal-theatre" && (
-        <SignalTheatre turn={cinemaTurn} />
+      {study === "orbital-signals" && (
+        <OrbitalSignals />
       )}
-      {study === "displacement-field" && <DisplacementField />}
-      {study === "noise-field" && <NoiseField />}
-      {study === "scroll-studies" && <ScrollStudies />}
+
+      {study === "signal-theatre" && (
+        <SignalTheatre
+          screenIndex={cinemaScreen}
+          fov={cinemaFov}
+        />
+      )}
+
+      {study === "displacement-field" && (
+        <DisplacementField />
+      )}
     </>
   );
 }
 
 export function CreativeMode() {
   const [active, setActive] = useState(false);
-  const [study, setStudy] = useState<StudyId>("orbital-signals");
-  const [cinemaTurn, setCinemaTurn] = useState(0);
+  const [study, setStudy] =
+    useState<StudyId>("orbital-signals");
+  const [cinemaScreen, setCinemaScreen] =
+    useState(0);
+  const [cinemaFov, setCinemaFov] =
+    useState(52);
 
   const selected =
-    studies.find((item) => item.id === study) ?? studies[0];
+    studies.find((item) => item.id === study) ??
+    studies[0];
 
   useEffect(() => {
     if (!active) return;
 
-    const previousOverflow = document.body.style.overflow;
+    const previousOverflow =
+      document.body.style.overflow;
+
     document.body.style.overflow = "hidden";
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown = (
+      event: KeyboardEvent,
+    ) => {
       if (event.key === "Escape") {
         setActive(false);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener(
+      "keydown",
+      handleKeyDown,
+    );
 
     return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow =
+        previousOverflow;
+
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown,
+      );
     };
   }, [active]);
+
+  function showCinemaScreen(next: number) {
+    const normalized =
+      (next + CINEMA_SCREENS.length) %
+      CINEMA_SCREENS.length;
+
+    setCinemaScreen(normalized);
+    setCinemaFov(52);
+  }
+
+  function changeCinemaZoom(delta: number) {
+    setCinemaFov((current) =>
+      THREE.MathUtils.clamp(
+        current + delta,
+        38,
+        68,
+      ),
+    );
+  }
 
   return (
     <>
@@ -616,48 +679,59 @@ export function CreativeMode() {
           role="dialog"
           aria-modal="true"
           aria-label="Live creative coding studies"
+          onWheel={(event) => {
+            if (study === "signal-theatre") {
+              changeCinemaZoom(
+                Math.sign(event.deltaY) * 2,
+              );
+            }
+          }}
         >
           <div className="absolute inset-0">
             <Canvas
               key={study}
-              camera={
-                study === "signal-theatre"
-                  ? { position: [0, 0.1, 0.3], fov: 52 }
-                  : { position: [0, 0, 6.5], fov: 48 }
-              }
+              camera={{
+                position: [0, 0, 6.5],
+                fov: 48,
+              }}
               dpr={[1, 1.65]}
               gl={{
                 antialias: true,
-                powerPreference: "high-performance",
+                powerPreference:
+                  "high-performance",
               }}
             >
-              <color attach="background" args={["#05070b"]} />
+              <color
+                attach="background"
+                args={["#05070b"]}
+              />
 
               <StudyScene
                 study={study}
-                cinemaTurn={cinemaTurn}
+                cinemaScreen={cinemaScreen}
+                cinemaFov={cinemaFov}
               />
             </Canvas>
           </div>
 
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,7,11,0.96)_0%,rgba(5,7,11,0.66)_30%,rgba(5,7,11,0.08)_58%,transparent_76%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,7,11,0.94)_0%,rgba(5,7,11,0.5)_24%,rgba(5,7,11,0.08)_44%,transparent_58%)]" />
 
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-5 md:p-8">
-            <div className="flex items-start justify-between gap-6 border-b border-paper/20 pb-5">
-              <div className="max-w-xl">
+            <div className="flex items-start justify-between gap-6">
+              <div className="max-w-md">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-orange">
                   {selected.eyebrow}
                 </p>
 
-                <h2 className="mt-3 text-4xl font-medium leading-[0.9] tracking-[-0.055em] md:text-7xl">
+                <h2 className="mt-3 text-4xl font-medium leading-[0.9] tracking-[-0.055em] md:text-6xl">
                   {selected.title}
                 </h2>
 
-                <p className="mt-5 max-w-lg text-sm leading-7 text-paper/65 md:text-base">
+                <p className="mt-4 max-w-sm text-sm leading-6 text-paper/60">
                   {selected.description}
                 </p>
 
-                <p className="mt-4 font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-orange">
+                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-orange">
                   {selected.hint}
                 </p>
               </div>
@@ -671,36 +745,63 @@ export function CreativeMode() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-              <div className="pointer-events-auto flex items-center gap-2">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div className="pointer-events-auto flex flex-wrap items-center gap-2">
                 {study === "signal-theatre" && (
                   <>
                     <button
                       type="button"
                       onClick={() =>
-                        setCinemaTurn((value) => value - 1)
+                        showCinemaScreen(
+                          cinemaScreen - 1,
+                        )
                       }
                       className="border border-paper/20 bg-ink/70 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.13em] transition-colors hover:border-orange hover:text-orange"
                     >
-                      ← Screen
+                      ← Prev screen
                     </button>
+
+                    <span className="min-w-24 text-center font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-orange">
+                      {CINEMA_SCREENS[cinemaScreen]}
+                    </span>
 
                     <button
                       type="button"
-                      onClick={() => setCinemaTurn(0)}
+                      onClick={() =>
+                        showCinemaScreen(
+                          cinemaScreen + 1,
+                        )
+                      }
                       className="border border-paper/20 bg-ink/70 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.13em] transition-colors hover:border-orange hover:text-orange"
                     >
-                      Center
+                      Next screen →
+                    </button>
+
+                    <span
+                      className="mx-1 h-5 w-px bg-paper/15"
+                      aria-hidden="true"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        changeCinemaZoom(-4)
+                      }
+                      className="border border-paper/20 bg-ink/70 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.13em] transition-colors hover:border-orange hover:text-orange"
+                      aria-label="Zoom in"
+                    >
+                      Zoom +
                     </button>
 
                     <button
                       type="button"
                       onClick={() =>
-                        setCinemaTurn((value) => value + 1)
+                        changeCinemaZoom(4)
                       }
                       className="border border-paper/20 bg-ink/70 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.13em] transition-colors hover:border-orange hover:text-orange"
+                      aria-label="Zoom out"
                     >
-                      Screen →
+                      Zoom −
                     </button>
                   </>
                 )}
@@ -713,7 +814,8 @@ export function CreativeMode() {
                     type="button"
                     onClick={() => {
                       setStudy(item.id);
-                      setCinemaTurn(0);
+                      setCinemaScreen(0);
+                      setCinemaFov(52);
                     }}
                     className={[
                       "shrink-0 border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.13em] transition-all",
@@ -723,7 +825,11 @@ export function CreativeMode() {
                     ].join(" ")}
                     aria-pressed={item.id === study}
                   >
-                    {String(index + 1).padStart(2, "0")} {item.title}
+                    {String(index + 1).padStart(
+                      2,
+                      "0",
+                    )}{" "}
+                    {item.title}
                   </button>
                 ))}
               </div>
