@@ -12,18 +12,13 @@ export function SectionLabel({
   return (
     <div
       className={[
-        "flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.16em]",
-        dark ? "text-ink/50" : "text-paper/60",
+        "flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em]",
+        dark ? "text-ink/55" : "text-paper/65",
       ].join(" ")}
     >
-      <span>{number}</span>
+      <span className="font-bold text-orange">{number}</span>
 
-      <span
-        className={[
-          "h-px w-6",
-          dark ? "bg-ink/20" : "bg-paper/25",
-        ].join(" ")}
-      />
+      <span className="h-px w-6 bg-orange/80" />
 
       <span>{children}</span>
     </div>
