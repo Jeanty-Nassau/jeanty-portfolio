@@ -4,84 +4,100 @@ export const webhookProcessingCaseStudy: CaseStudy = {
   projectSlug: "webhook-processing-platform",
 
   intro:
-    "Production backend infrastructure responsible for ingesting and processing high-volume telematics events across distributed services. My work focused on reliability, event processing, integration boundaries, data access, testing, and operational correctness.",
+    "A public .NET reference implementation of a durable asynchronous event-processing pipeline, built to make failure semantics explicit rather than hide them behind a simple happy-path Kafka demo.",
 
   metrics: [
     {
-      value: "50M+",
-      label: "Events processed per day",
-      detail: "Typical production volume",
+      value: "At-least-once",
+      label: "Delivery model",
+      detail: "With idempotent side effects",
     },
     {
-      value: "1K+",
-      label: "Events per second",
-      detail: "Sustained throughput",
+      value: "1s / 5s / 30s",
+      label: "Retry schedule",
+      detail: "Durable PostgreSQL-backed delays with jitter",
     },
     {
-      value: "99.99%+",
-      label: "Successful processing",
-      detail: "Observed across a representative production window",
+      value: "OpenTelemetry",
+      label: "Observability",
+      detail: "Traces, metrics, Prometheus, Tempo and Grafana",
     },
   ],
 
   sections: [
     {
-      eyebrow: "Context",
-      title: "Operating at production scale",
+      eyebrow: "Problem",
+      title: "The difficult part starts after an event is published",
       body: [
-        "The platform sits within a fleet-telematics environment where large volumes of incoming events must be received, validated, transformed, routed, and processed reliably across multiple backend services.",
+        "Event-driven systems become interesting when delivery is duplicated, consumers crash between side effects and offset commits, downstream processing fails, or poison messages repeatedly return to the same consumer.",
 
-        "At this scale, seemingly small implementation details can become operational problems. Error propagation, serialization behaviour, database access patterns, retry semantics, and downstream API failures all affect the reliability of the wider system.",
+        "This project was designed around those failure windows. The domain itself is intentionally small so the repository can focus on delivery semantics, recoverability, observability, and operational behaviour.",
       ],
     },
 
     {
-      eyebrow: "Engineering",
-      title: "Designing for failure, not just the happy path",
+      eyebrow: "Reliability",
+      title: "At-least-once delivery with explicit idempotency",
       body: [
-        "A recurring focus of my work was making failures visible and actionable rather than allowing services to fail silently or lose important context.",
+        "The processor treats duplicate delivery as expected behaviour rather than an exceptional case. EventId is the application idempotency key, enforced by PostgreSQL so a crash after persistence but before offset commit can safely result in redelivery.",
 
-        "This included improving exception propagation through asynchronous consumers, addressing integration edge cases, strengthening data access behaviour, and expanding automated test coverage around areas where regressions would be costly.",
+        "The project deliberately does not claim exactly-once processing. Broker guarantees do not automatically make arbitrary external side effects exactly once, so the reliability model is expressed in application terms that can be tested and reasoned about.",
       ],
     },
 
     {
-      eyebrow: "Architecture",
-      title: "Working across system boundaries",
+      eyebrow: "Failure handling",
+      title: "Retries are durable state, not sleeping consumers",
       body: [
-        "The work spans event-driven services, Kafka-based consumers, AWS infrastructure, PostgreSQL-backed services, and external or internal APIs.",
+        "Retryable failures are persisted with a next-attempt timestamp. A separate retry dispatcher safely claims due rows with PostgreSQL locking semantics and republishes them only when they are ready.",
 
-        "A large part of the engineering challenge is not any individual technology. It is preserving correct behaviour as data moves between systems with different contracts, failure modes, and operational constraints.",
+        "Permanent failures and exhausted retries are published to a dead-letter topic. Source offsets are committed only after the relevant durable action succeeds, preserving recoverability when PostgreSQL or the broker is unavailable.",
+      ],
+    },
+
+    {
+      eyebrow: "Operations",
+      title: "Designed to be inspected while it is failing",
+      body: [
+        "The local stack includes Redpanda, PostgreSQL, OpenTelemetry Collector, Prometheus, Tempo, and Grafana. Custom telemetry exposes ingestion, processing, duplicate, retry, and dead-letter behaviour without introducing high-cardinality identifiers.",
+
+        "Integration tests use real disposable Kafka-compatible and PostgreSQL containers, and the repository includes repeatable scripts for duplicates, retries, dead-letter scenarios, consumer scaling, smoke tests, and load testing.",
       ],
     },
   ],
 
   contributions: [
     {
-      title: "Improved consumer failure propagation",
+      title: "Explicit delivery semantics",
       description:
-        "Changed Kafka consumer error handling so specific downstream failures propagated correctly and could trigger critical operational alerts instead of being obscured by generic processing behaviour.",
+        "Implemented at-least-once processing with database-enforced idempotency so duplicate Kafka delivery does not duplicate logical side effects.",
     },
 
     {
-      title: "Modernised legacy data access",
+      title: "Durable delayed retries",
       description:
-        "Helped remove legacy data-access code and replace it with PostgreSQL and Dapper-based implementations, including JSON type handling and integration-test coverage.",
+        "Separated retry scheduling from consumer execution using PostgreSQL-backed retry state and a dispatcher that safely claims and republishes due work.",
     },
 
     {
-      title: "Provider abstraction work",
+      title: "Recoverable dead-letter handling",
       description:
-        "Contributed to provider-agnostic abstractions used to reduce coupling between application logic and specific external implementations.",
+        "Ensured malformed, unsupported, permanent, and retry-exhausted events reach a dead-letter topic without prematurely committing their source offsets.",
     },
 
     {
-      title: "Expanded automated testing",
+      title: "Operational visibility",
       description:
-        "Added substantial unit and integration test coverage around backend components where correctness depended on multiple edge cases and integration boundaries.",
+        "Instrumented the pipeline with OpenTelemetry traces and metrics and provisioned a local Prometheus, Tempo, and Grafana stack.",
+    },
+
+    {
+      title: "Repeatable verification",
+      description:
+        "Added container-backed integration tests, failure-simulation scripts, smoke tests, and a k6 workload with a documented benchmark methodology.",
     },
   ],
 
   disclaimer:
-    "This case study describes professional work at a high level. Architecture, customer information, proprietary business logic, internal service names, and other sensitive implementation details have intentionally been omitted or generalized.",
+    "This is an independently designed portfolio/reference project. It uses generic event-processing concepts and does not contain or reproduce proprietary employer code, schemas, business logic, naming, or architecture.",
 };
