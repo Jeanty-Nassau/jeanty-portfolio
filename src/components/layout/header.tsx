@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Container } from "@/components/ui/container";
 
@@ -36,6 +36,19 @@ export function Header({
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isLight = theme === "light";
+
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [menuOpen]);
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(`${href}/`);
