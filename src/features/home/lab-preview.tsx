@@ -25,13 +25,13 @@ export function LabPreview() {
               </p>
 
               <h2 className="mt-6 max-w-4xl text-4xl font-medium leading-[0.98] tracking-[-0.045em] sm:text-5xl lg:text-7xl">
-                Small systems built to explore how things move.
+                Three interactive studies, each built around a different kind of spatial response.
               </h2>
 
               <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/65">
-                A collection of Three.js and WebGL studies first explored in
-                2022 and revisited in 2026 with a more deliberate eye for
-                interaction, motion, and performance.
+                A night-side globe, a rotating cinema, and a responsive signal
+                terrain — early Three.js ideas revisited as more deliberate,
+                interactive pieces.
               </p>
 
               <div className="mt-14 border-t border-paper/20">
