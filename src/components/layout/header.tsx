@@ -5,42 +5,26 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Container } from "@/components/ui/container";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const navigation = [
-  {
-    label: "Work",
-    href: "/work",
-  },
-  {
-    label: "Lab",
-    href: "/lab",
-  },
-  {
-    label: "About",
-    href: "/about",
-  },
-  {
-    label: "Notes",
-    href: "/notes",
-  },
+  { label: "Work", href: "/work" },
+  { label: "Lab", href: "/lab" },
+  { label: "About", href: "/about" },
+  { label: "Notes", href: "/notes" },
 ];
 
 type HeaderProps = {
   theme?: "light" | "dark";
 };
 
-export function Header({
-  theme = "dark",
-}: HeaderProps) {
+export function Header({ theme = "dark" }: HeaderProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-
   const isLight = theme === "light";
 
   useEffect(() => {
-    if (!menuOpen) {
-      return;
-    }
+    if (!menuOpen) return;
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -83,38 +67,50 @@ export function Header({
               Software Developer / Cape Town
             </p>
 
-            <nav className="hidden items-center gap-6 md:flex">
-              {navigation.map((item) => {
-                const active = isActive(item.href);
+            <div className="hidden items-center gap-6 md:flex">
+              <nav className="flex items-center gap-6">
+                {navigation.map((item) => {
+                  const active = isActive(item.href);
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={[
-                      "group relative font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors hover:text-orange",
-                      isLight
-                        ? active
-                          ? "text-ink"
-                          : "text-ink/50"
-                        : active
-                          ? "text-paper"
-                          : "text-paper/60",
-                    ].join(" ")}
-                  >
-                    {item.label}
-
-                    <span
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
                       className={[
-                        "absolute -bottom-2 left-0 h-[2px] bg-orange transition-all duration-300",
-                        active ? "w-full" : "w-0 group-hover:w-full",
+                        "group relative font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors hover:text-orange",
+                        isLight
+                          ? active
+                            ? "text-ink"
+                            : "text-ink/50"
+                          : active
+                            ? "text-paper"
+                            : "text-paper/60",
                       ].join(" ")}
-                      aria-hidden="true"
-                    />
-                  </Link>
-                );
-              })}
-            </nav>
+                    >
+                      {item.label}
+
+                      <span
+                        className={[
+                          "absolute -bottom-2 left-0 h-[2px] bg-orange transition-all duration-300",
+                          active ? "w-full" : "w-0 group-hover:w-full",
+                        ].join(" ")}
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <span
+                className={[
+                  "h-4 w-px",
+                  isLight ? "bg-ink/15" : "bg-paper/20",
+                ].join(" ")}
+                aria-hidden="true"
+              />
+
+              <ThemeToggle />
+            </div>
 
             <button
               type="button"
@@ -154,9 +150,13 @@ export function Header({
               ))}
             </nav>
 
-            <p className="pb-6 font-mono text-[10px] uppercase tracking-[0.16em] text-paper/40">
-              Cape Town / South Africa
-            </p>
+            <div className="flex items-center justify-between border-t border-paper/20 py-6">
+              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-paper/40">
+                Cape Town / South Africa
+              </p>
+
+              <ThemeToggle />
+            </div>
           </Container>
         </div>
       )}
