@@ -60,10 +60,10 @@ export default function AboutPage() {
 
               <div className="lg:col-span-8">
                 <h1 className="max-w-4xl text-5xl font-medium leading-[0.94] tracking-[-0.05em] sm:text-6xl lg:text-8xl">
-                  I like building things that have to work.
+                  I like building things that have to <span className="text-orange">work.</span>
                 </h1>
 
-                <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/70">
+                <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/75">
                   I&apos;m a software developer based in Cape Town, focused on
                   backend systems, distributed architectures, and the
                   engineering work required to keep software reliable at scale.
@@ -75,32 +75,40 @@ export default function AboutPage() {
 
         <section className="bg-paper py-24 text-ink md:py-32">
           <Container>
-            <div className="grid gap-16 lg:grid-cols-12">
-              <div className="lg:col-span-4">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">
+            <div className="grid items-start gap-12 lg:grid-cols-12 lg:gap-16">
+              <div className="lg:col-span-5">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-cobalt">
                   What I do
                 </p>
 
-                <figure className="mt-8 max-w-sm">
-                  <div className="border-l-4 border-orange pl-3">
+                <figure className="mt-8">
+                  <div className="group relative overflow-hidden border-l-4 border-orange bg-cobalt">
                     <Image
                       src="/portrait.jpeg"
                       alt="Jeanty Nassau seated outdoors on a wooden bench"
                       width={912}
                       height={1620}
                       priority
-                      className="h-auto w-full"
+                      className="aspect-[4/5] w-full object-cover object-[50%_64%] transition-transform duration-500 group-hover:scale-[1.025]"
                     />
+
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-cobalt/55 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   </div>
 
-                  <figcaption className="mt-4 flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
-                    <span className="h-1.5 w-1.5 rounded-full bg-orange" />
-                    Cape Town / 2026
+                  <figcaption className="mt-4 flex items-center justify-between gap-3">
+                    <span className="flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
+                      <span className="h-1.5 w-1.5 rounded-full bg-orange" />
+                      Cape Town / 2026
+                    </span>
+
+                    <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-cobalt">
+                      Builder / Engineer
+                    </span>
                   </figcaption>
                 </figure>
               </div>
 
-              <div className="lg:col-span-8">
+              <div className="lg:col-span-7 lg:pt-8">
                 <div className="max-w-3xl space-y-8 text-xl leading-9 text-ink/70">
                   <p>
                     Professionally, I spend most of my time working with .NET,
@@ -121,16 +129,22 @@ export default function AboutPage() {
                     that remains understandable as it grows.
                   </p>
                 </div>
+
+                <div className="mt-12 h-px w-28 bg-cobalt" />
+
+                <p className="mt-5 max-w-xl font-mono text-[11px] font-bold uppercase leading-6 tracking-[0.14em] text-orange">
+                  Production systems / distributed architecture / creative code
+                </p>
               </div>
             </div>
           </Container>
         </section>
 
-        <section className="bg-ink py-24 text-paper md:py-32">
+        <section className="bg-cobalt-dark py-24 text-paper md:py-32">
           <Container>
             <div className="grid gap-12 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-paper/50">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-orange">
                   Current stack
                 </p>
               </div>
@@ -140,7 +154,7 @@ export default function AboutPage() {
                   {stack.map((technology) => (
                     <span
                       key={technology}
-                      className="border border-paper/20 px-4 py-3 font-mono text-xs uppercase tracking-[0.13em] transition-colors hover:border-orange hover:text-orange"
+                      className="border border-paper/20 px-4 py-3 font-mono text-xs font-semibold uppercase tracking-[0.13em] transition-all duration-300 hover:-translate-y-0.5 hover:border-orange hover:bg-orange hover:text-ink"
                     >
                       {technology}
                     </span>
@@ -155,7 +169,7 @@ export default function AboutPage() {
           <Container>
             <div className="grid gap-12 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-cobalt">
                   Experience
                 </p>
               </div>
@@ -168,12 +182,12 @@ export default function AboutPage() {
                     return (
                       <article
                         key={item.period}
-                        className="grid gap-6 border-b border-ink/15 py-8 md:grid-cols-[160px_1fr]"
+                        className="group grid gap-6 border-b border-ink/15 py-8 transition-all duration-300 hover:border-cobalt hover:bg-cobalt hover:px-5 md:grid-cols-[160px_1fr]"
                       >
                         <p
                           className={[
-                            "font-mono text-[11px] font-semibold uppercase tracking-[0.14em]",
-                            isCurrent ? "text-orange" : "text-ink/45",
+                            "font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors duration-300",
+                            isCurrent ? "text-orange" : "text-ink/45 group-hover:text-orange",
                           ].join(" ")}
                         >
                           {item.period}
@@ -182,14 +196,14 @@ export default function AboutPage() {
                         <div>
                           <h2
                             className={[
-                              "text-2xl font-medium tracking-[-0.03em]",
-                              isCurrent ? "text-orange" : "",
+                              "text-2xl font-medium tracking-[-0.03em] transition-colors duration-300 group-hover:text-paper",
+                              isCurrent ? "text-cobalt" : "",
                             ].join(" ")}
                           >
                             {item.role}
                           </h2>
 
-                          <p className="mt-3 max-w-2xl leading-7 text-ink/60">
+                          <p className="mt-3 max-w-2xl leading-7 text-ink/60 transition-colors duration-300 group-hover:text-paper/75">
                             {item.description}
                           </p>
                         </div>
