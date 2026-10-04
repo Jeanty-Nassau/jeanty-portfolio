@@ -232,6 +232,7 @@ const earthFragment = `
 function OrbitalSignals() {
   const texture = useTexture(EARTH_TEXTURE);
   const earth = useRef<THREE.Mesh>(null);
+  const earthMaterial = useRef<THREE.ShaderMaterial>(null);
   const orbitRig = useRef<THREE.Group>(null);
 
   const uniforms = useMemo(
@@ -243,7 +244,10 @@ function OrbitalSignals() {
   );
 
   useFrame((state, delta) => {
-    uniforms.uTime.value = state.clock.elapsedTime;
+    if (earthMaterial.current) {
+      earthMaterial.current.uniforms.uTime.value =
+        state.clock.elapsedTime;
+    }
     if (earth.current) {
       earth.current.rotation.y += delta * 0.045;
     }
@@ -262,6 +266,7 @@ function OrbitalSignals() {
         <mesh ref={earth}>
           <sphereGeometry args={[2.05, 128, 128]} />
           <shaderMaterial
+            ref={earthMaterial}
             vertexShader={earthVertex}
             fragmentShader={earthFragment}
             uniforms={uniforms}
@@ -686,6 +691,10 @@ const waveWireFragment = `
 function DisplacementField() {
   const group =
     useRef<THREE.Group>(null);
+  const surfaceMaterial =
+    useRef<THREE.ShaderMaterial>(null);
+  const wireMaterial =
+    useRef<THREE.ShaderMaterial>(null);
 
   const { pointer } = useThree();
 
@@ -710,13 +719,25 @@ function DisplacementField() {
   );
 
   useFrame((state) => {
-    uniforms.uTime.value =
-      state.clock.elapsedTime;
+    if (surfaceMaterial.current) {
+      surfaceMaterial.current.uniforms.uTime.value =
+        state.clock.elapsedTime;
 
-    uniforms.uPointer.value.set(
-      pointer.x,
-      pointer.y,
-    );
+      surfaceMaterial.current.uniforms.uPointer.value.set(
+        pointer.x,
+        pointer.y,
+      );
+    }
+
+    if (wireMaterial.current) {
+      wireMaterial.current.uniforms.uTime.value =
+        state.clock.elapsedTime;
+
+      wireMaterial.current.uniforms.uPointer.value.set(
+        pointer.x,
+        pointer.y,
+      );
+    }
 
     if (group.current) {
       group.current.rotation.z +=
@@ -751,6 +772,7 @@ function DisplacementField() {
           />
 
           <shaderMaterial
+            ref={surfaceMaterial}
             vertexShader={waveVertex}
             fragmentShader={waveFragment}
             uniforms={uniforms}
@@ -765,6 +787,7 @@ function DisplacementField() {
           />
 
           <shaderMaterial
+            ref={wireMaterial}
             vertexShader={waveVertex}
             fragmentShader={waveWireFragment}
             uniforms={uniforms}
