@@ -1,8 +1,7 @@
 "use client";
 
 import {
-  MeshReflectorMaterial,
-  OrbitControls,
+   OrbitControls,
   PerspectiveCamera,
   useTexture,
   useVideoTexture,
@@ -137,6 +136,7 @@ const earthVertex = `
 
 const earthFragment = `
   uniform sampler2D uMap;
+  uniform float uTime;
 
   varying vec2 vUv;
   varying vec3 vNormal;
@@ -189,6 +189,42 @@ const earthFragment = `
       rim *
       1.1;
 
+    float lon =
+      abs(fract(vUv.x * 18.0) - 0.5);
+
+    float lat =
+      abs(fract(vUv.y * 10.0) - 0.5);
+
+    float grid =
+      1.0 -
+      smoothstep(
+        0.455,
+        0.5,
+        min(lon, lat)
+      );
+
+    color +=
+      vec3(0.12, 0.32, 1.0) *
+      grid *
+      0.18;
+
+    float scanCenter =
+      fract(uTime * 0.055);
+
+    float scan =
+      1.0 -
+      smoothstep(
+        0.0,
+        0.035,
+        abs(vUv.y - scanCenter)
+      );
+
+    color +=
+      vec3(1.0, 0.38, 0.03) *
+      scan *
+      landMask *
+      1.25;
+
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -201,11 +237,13 @@ function OrbitalSignals() {
   const uniforms = useMemo(
     () => ({
       uMap: { value: texture },
+      uTime: { value: 0 },
     }),
     [texture],
   );
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
+    uniforms.uTime.value = state.clock.elapsedTime;
     if (earth.current) {
       earth.current.rotation.y += delta * 0.045;
     }
@@ -272,8 +310,22 @@ function OrbitalSignals() {
         </mesh>
 
         <mesh position={[2.65, 0.85, 0]}>
-          <sphereGeometry args={[0.055, 18, 18]} />
+          <sphereGeometry args={[0.07, 18, 18]} />
           <meshBasicMaterial color="#ff991c" />
+        </mesh>
+
+        <mesh position={[-2.45, -1.15, 0.35]}>
+          <sphereGeometry args={[0.045, 16, 16]} />
+          <meshBasicMaterial color="#91a7ff" />
+        </mesh>
+
+        <mesh rotation={[0.2, 1.15, 0.3]}>
+          <torusGeometry args={[3.7, 0.004, 8, 240]} />
+          <meshBasicMaterial
+            color="#ff991c"
+            transparent
+            opacity={0.2}
+          />
         </mesh>
       </group>
 
@@ -336,10 +388,6 @@ function SignalTheatre({
   const buildingSource = useTexture(
     `${CINEMA_ASSET_BASE}/building.jpeg`,
   );
-  const floorSource = useTexture(
-    `${CINEMA_ASSET_BASE}/floorTexture.jpg`,
-  );
-
   const building = useMemo(() => {
     const clone = buildingSource.clone();
     clone.colorSpace = THREE.SRGBColorSpace;
@@ -347,25 +395,14 @@ function SignalTheatre({
     return clone;
   }, [buildingSource]);
 
-  const floorTexture = useMemo(() => {
-    const clone = floorSource.clone();
-    clone.colorSpace = THREE.SRGBColorSpace;
-    clone.wrapS = THREE.RepeatWrapping;
-    clone.wrapT = THREE.RepeatWrapping;
-    clone.repeat.set(8, 8);
-    clone.needsUpdate = true;
-    return clone;
-  }, [floorSource]);
-
   useEffect(() => {
     return () => {
       building.dispose();
-      floorTexture.dispose();
     };
-  }, [building, floorTexture]);
+  }, [building]);
 
   const theatre = useRef<THREE.Group>(null);
-  const screenArc = Math.PI / 3.2;
+  const screenArc = Math.PI / 2 - 0.16;
 
   useFrame(() => {
     if (!theatre.current) return;
@@ -382,8 +419,8 @@ function SignalTheatre({
     <>
       <PerspectiveCamera
         makeDefault
-        position={[0, 0.38, 0]}
-        rotation={[-0.075, 0, 0]}
+        position={[0, 0.28, 0]}
+        rotation={[-0.09, 0, 0]}
         fov={fov}
         near={0.1}
         far={80}
@@ -427,16 +464,10 @@ function SignalTheatre({
       >
         <circleGeometry args={[4.95, 96]} />
 
-        <MeshReflectorMaterial
-          map={floorTexture}
-          color="#626878"
-          roughness={0.58}
-          metalness={0.16}
-          mirror={0.3}
-          blur={[220, 90]}
-          resolution={512}
-          mixBlur={1}
-          mixStrength={0.5}
+        <meshStandardMaterial
+          color="#11151f"
+          roughness={0.72}
+          metalness={0.1}
         />
       </mesh>
 
