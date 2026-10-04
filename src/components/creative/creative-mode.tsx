@@ -4,6 +4,7 @@ import {
   MeshReflectorMaterial,
   OrbitControls,
   useTexture,
+  useVideoTexture,
 } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
@@ -129,13 +130,20 @@ function Stars() {
 }
 
 function OrbitalSignals() {
-  const texture = useTexture(EARTH_TEXTURE);
+  const sourceTexture = useTexture(EARTH_TEXTURE);
+  const texture = useMemo(() => {
+    const clone = sourceTexture.clone();
+    clone.colorSpace = THREE.SRGBColorSpace;
+    clone.anisotropy = 8;
+    clone.needsUpdate = true;
+    return clone;
+  }, [sourceTexture]);
   const earth = useRef<THREE.Mesh>(null);
 
   useEffect(() => {
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = 8;
-    texture.needsUpdate = true;
+    return () => {
+      texture.dispose();
+    };
   }, [texture]);
 
   useFrame((_, delta) => {
@@ -189,105 +197,18 @@ function OrbitalSignals() {
   );
 }
 
-function useVideoTexture(src: string) {
-  const [texture, setTexture] = useState<THREE.VideoTexture | null>(null);
-
-  useEffect(() => {
-    const video = document.createElement("video");
-
-    video.src = src;
-    video.crossOrigin = "anonymous";
-    video.loop = true;
-    video.muted = true;
-    video.playsInline = true;
-    video.preload = "auto";
-
-    const nextTexture = new THREE.VideoTexture(video);
-    nextTexture.colorSpace = THREE.SRGBColorSpace;
-    nextTexture.minFilter = THREE.LinearFilter;
-    nextTexture.magFilter = THREE.LinearFilter;
-
-    setTexture(nextTexture);
-    void video.play().catch(() => undefined);
-
-    return () => {
-      video.pause();
-      video.removeAttribute("src");
-      video.load();
-      nextTexture.dispose();
-    };
-  }, [src]);
-
-  return texture;
-}
-
-function CinemaLookControls() {
-  const { camera, gl } = useThree();
-  const targetYaw = useRef(0);
-  const targetPitch = useRef(0);
-  const currentYaw = useRef(0);
-  const currentPitch = useRef(0);
-
-  useEffect(() => {
-    const element = gl.domElement;
-    let dragging = false;
-    let lastX = 0;
-    let lastY = 0;
-
-    const down = (event: PointerEvent) => {
-      dragging = true;
-      lastX = event.clientX;
-      lastY = event.clientY;
-      element.setPointerCapture(event.pointerId);
-    };
-
-    const move = (event: PointerEvent) => {
-      if (!dragging) return;
-
-      const dx = event.clientX - lastX;
-      const dy = event.clientY - lastY;
-
-      lastX = event.clientX;
-      lastY = event.clientY;
-
-      targetYaw.current -= dx * 0.0045;
-      targetPitch.current = THREE.MathUtils.clamp(
-        targetPitch.current - dy * 0.003,
-        -0.34,
-        0.34,
-      );
-    };
-
-    const up = (event: PointerEvent) => {
-      dragging = false;
-
-      if (element.hasPointerCapture(event.pointerId)) {
-        element.releasePointerCapture(event.pointerId);
-      }
-    };
-
-    element.addEventListener("pointerdown", down);
-    element.addEventListener("pointermove", move);
-    element.addEventListener("pointerup", up);
-    element.addEventListener("pointercancel", up);
-
-    return () => {
-      element.removeEventListener("pointerdown", down);
-      element.removeEventListener("pointermove", move);
-      element.removeEventListener("pointerup", up);
-      element.removeEventListener("pointercancel", up);
-    };
-  }, [gl]);
+function TheatrePointerControls({
+  theatre,
+}: {
+  theatre: React.RefObject<THREE.Group | null>;
+}) {
+  const { pointer } = useThree();
 
   useFrame(() => {
-    currentYaw.current +=
-      (targetYaw.current - currentYaw.current) * 0.08;
-    currentPitch.current +=
-      (targetPitch.current - currentPitch.current) * 0.08;
+    if (!theatre.current) return;
 
-    camera.rotation.order = "YXZ";
-    camera.rotation.y = currentYaw.current;
-    camera.rotation.x = currentPitch.current;
+    theatre.current.rotation.x +=
+      (pointer.y * 0.08 - theatre.current.rotation.x) * 0.04;
   });
 
   return null;
@@ -296,33 +217,63 @@ function CinemaLookControls() {
 function SignalTheatre({ turn }: { turn: number }) {
   const castle = useVideoTexture(
     `${CINEMA_ASSET_BASE}/castleGif.mp4`,
+    {
+      muted: true,
+      loop: true,
+      playsInline: true,
+      crossOrigin: "anonymous",
+    },
   );
   const house = useVideoTexture(
     `${CINEMA_ASSET_BASE}/houseGif.mp4`,
+    {
+      muted: true,
+      loop: true,
+      playsInline: true,
+      crossOrigin: "anonymous",
+    },
   );
   const sky = useVideoTexture(
     `${CINEMA_ASSET_BASE}/sky2Gif.mp4`,
+    {
+      muted: true,
+      loop: true,
+      playsInline: true,
+      crossOrigin: "anonymous",
+    },
   );
-  const building = useTexture(
+  const buildingSource = useTexture(
     `${CINEMA_ASSET_BASE}/building.jpeg`,
   );
-  const floorTexture = useTexture(
+  const floorSource = useTexture(
     `${CINEMA_ASSET_BASE}/floorTexture.jpg`,
   );
 
-  const theatre = useRef<THREE.Group>(null);
+  const building = useMemo(() => {
+    const clone = buildingSource.clone();
+    clone.colorSpace = THREE.SRGBColorSpace;
+    clone.needsUpdate = true;
+    return clone;
+  }, [buildingSource]);
+
+  const floorTexture = useMemo(() => {
+    const clone = floorSource.clone();
+    clone.colorSpace = THREE.SRGBColorSpace;
+    clone.wrapS = THREE.RepeatWrapping;
+    clone.wrapT = THREE.RepeatWrapping;
+    clone.repeat.set(8, 8);
+    clone.needsUpdate = true;
+    return clone;
+  }, [floorSource]);
 
   useEffect(() => {
-    building.colorSpace = THREE.SRGBColorSpace;
-    floorTexture.colorSpace = THREE.SRGBColorSpace;
-
-    floorTexture.wrapS = THREE.RepeatWrapping;
-    floorTexture.wrapT = THREE.RepeatWrapping;
-    floorTexture.repeat.set(8, 8);
-
-    building.needsUpdate = true;
-    floorTexture.needsUpdate = true;
+    return () => {
+      building.dispose();
+      floorTexture.dispose();
+    };
   }, [building, floorTexture]);
+
+  const theatre = useRef<THREE.Group>(null);
 
   useFrame(() => {
     if (!theatre.current) return;
@@ -336,7 +287,7 @@ function SignalTheatre({ turn }: { turn: number }) {
 
   return (
     <>
-      <CinemaLookControls />
+      <TheatrePointerControls theatre={theatre} />
 
       <group ref={theatre}>
         {textures.map((texture, index) => (
