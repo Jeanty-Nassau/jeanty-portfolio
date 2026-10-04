@@ -1,3 +1,4 @@
+import { LiveWeddingPreview } from "@/components/project/live-wedding-preview";
 import { Container } from "@/components/ui/container";
 import { weddingWebAppCaseStudy } from "@/content/projects/wedding-web-app";
 
@@ -32,6 +33,8 @@ export function WeddingCaseStudy() {
           </div>
         </Container>
       </section>
+
+      <LiveWeddingPreview />
 
       <section className="bg-paper text-ink">
         <Container>
