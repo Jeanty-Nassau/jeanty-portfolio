@@ -6,8 +6,7 @@ export const siteConfig = {
   location: "Cape Town, South Africa",
 
   socials: {
-    github: "https://github.com/YOUR_GITHUB_USERNAME",
+    github: "https://github.com/Jeanty-Nassau",
     linkedin: "https://www.linkedin.com/in/jeanty-nassau/",
-    email: "mailto:YOUR_EMAIL_ADDRESS",
   },
 };
