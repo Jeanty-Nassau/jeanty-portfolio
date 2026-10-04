@@ -1,7 +1,8 @@
+import type { Metadata } from "next";
+
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Container } from "@/components/ui/container";
-import type { Metadata } from "next";
 
 const stack = [
   ".NET",
@@ -70,11 +71,7 @@ export default function AboutPage() {
             </div>
           </Container>
         </section>
-        <section className="bg-paper text-ink">
-          <Container>
-            <div className="aspect-[16/7] bg-ink" />
-          </Container>
-        </section>
+
         <section className="bg-paper py-24 text-ink md:py-32">
           <Container>
             <div className="grid gap-16 lg:grid-cols-12">
