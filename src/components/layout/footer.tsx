@@ -22,28 +22,28 @@ export function Footer() {
             <div className="flex flex-wrap gap-x-8 gap-y-4 md:justify-end">
               <Link
                 href="/work"
-                className="font-mono text-xs uppercase tracking-[0.15em]"
+                className="font-mono text-xs font-semibold uppercase tracking-[0.15em] transition-colors hover:text-orange"
               >
                 Work
               </Link>
 
               <Link
                 href="/lab"
-                className="font-mono text-xs uppercase tracking-[0.15em]"
+                className="font-mono text-xs font-semibold uppercase tracking-[0.15em] transition-colors hover:text-orange"
               >
                 Lab
               </Link>
 
               <Link
                 href="/about"
-                className="font-mono text-xs uppercase tracking-[0.15em]"
+                className="font-mono text-xs font-semibold uppercase tracking-[0.15em] transition-colors hover:text-orange"
               >
                 About
               </Link>
 
               <Link
                 href="/notes"
-                className="font-mono text-xs uppercase tracking-[0.15em]"
+                className="font-mono text-xs font-semibold uppercase tracking-[0.15em] transition-colors hover:text-orange"
               >
                 Notes
               </Link>
@@ -52,7 +52,7 @@ export function Footer() {
                 href={siteConfig.socials.github}
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-xs uppercase tracking-[0.15em] text-orange"
+                className="font-mono text-xs font-bold uppercase tracking-[0.15em] text-orange transition-colors hover:text-paper"
               >
                 GitHub ↗
               </a>
@@ -61,7 +61,7 @@ export function Footer() {
                 href={siteConfig.socials.linkedin}
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-xs uppercase tracking-[0.15em] text-orange"
+                className="font-mono text-xs font-bold uppercase tracking-[0.15em] text-orange transition-colors hover:text-paper"
               >
                 LinkedIn ↗
               </a>
