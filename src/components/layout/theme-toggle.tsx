@@ -30,8 +30,15 @@ export function ThemeToggle() {
 
   useEffect(() => {
     const preferred = getPreferredTheme();
-    setTheme(preferred);
     applyTheme(preferred);
+
+    const frame = window.requestAnimationFrame(() => {
+      setTheme(preferred);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   function toggleTheme() {
