@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
@@ -52,7 +53,7 @@ export default function AboutPage() {
           <Container>
             <div className="grid gap-12 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <p className="font-mono text-xs uppercase tracking-[0.16em] text-orange">
+                <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-orange">
                   About / Jeanty Nassau
                 </p>
               </div>
@@ -62,7 +63,7 @@ export default function AboutPage() {
                   I like building things that have to work.
                 </h1>
 
-                <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/65">
+                <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/70">
                   I&apos;m a software developer based in Cape Town, focused on
                   backend systems, distributed architectures, and the
                   engineering work required to keep software reliable at scale.
@@ -76,9 +77,27 @@ export default function AboutPage() {
           <Container>
             <div className="grid gap-16 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink/40">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">
                   What I do
                 </p>
+
+                <figure className="mt-8 max-w-sm">
+                  <div className="border-l-4 border-orange pl-3">
+                    <Image
+                      src="/portrait.jpeg"
+                      alt="Jeanty Nassau seated outdoors on a wooden bench"
+                      width={912}
+                      height={1620}
+                      priority
+                      className="h-auto w-full"
+                    />
+                  </div>
+
+                  <figcaption className="mt-4 flex items-center gap-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
+                    <span className="h-1.5 w-1.5 rounded-full bg-orange" />
+                    Cape Town / 2026
+                  </figcaption>
+                </figure>
               </div>
 
               <div className="lg:col-span-8">
@@ -111,7 +130,7 @@ export default function AboutPage() {
           <Container>
             <div className="grid gap-12 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-paper/45">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-paper/50">
                   Current stack
                 </p>
               </div>
@@ -121,7 +140,7 @@ export default function AboutPage() {
                   {stack.map((technology) => (
                     <span
                       key={technology}
-                      className="border border-paper/20 px-4 py-3 font-mono text-xs uppercase tracking-[0.13em]"
+                      className="border border-paper/20 px-4 py-3 font-mono text-xs uppercase tracking-[0.13em] transition-colors hover:border-orange hover:text-orange"
                     >
                       {technology}
                     </span>
@@ -136,33 +155,47 @@ export default function AboutPage() {
           <Container>
             <div className="grid gap-12 lg:grid-cols-12">
               <div className="lg:col-span-4">
-                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink/40">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-ink/45">
                   Experience
                 </p>
               </div>
 
               <div className="lg:col-span-8">
                 <div className="border-t border-ink/15">
-                  {timeline.map((item) => (
-                    <article
-                      key={item.period}
-                      className="grid gap-6 border-b border-ink/15 py-8 md:grid-cols-[160px_1fr]"
-                    >
-                      <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink/40">
-                        {item.period}
-                      </p>
+                  {timeline.map((item) => {
+                    const isCurrent = item.period.includes("Present");
 
-                      <div>
-                        <h2 className="text-2xl font-medium tracking-[-0.03em]">
-                          {item.role}
-                        </h2>
-
-                        <p className="mt-3 max-w-2xl leading-7 text-ink/60">
-                          {item.description}
+                    return (
+                      <article
+                        key={item.period}
+                        className="grid gap-6 border-b border-ink/15 py-8 md:grid-cols-[160px_1fr]"
+                      >
+                        <p
+                          className={[
+                            "font-mono text-[11px] font-semibold uppercase tracking-[0.14em]",
+                            isCurrent ? "text-orange" : "text-ink/45",
+                          ].join(" ")}
+                        >
+                          {item.period}
                         </p>
-                      </div>
-                    </article>
-                  ))}
+
+                        <div>
+                          <h2
+                            className={[
+                              "text-2xl font-medium tracking-[-0.03em]",
+                              isCurrent ? "text-orange" : "",
+                            ].join(" ")}
+                          >
+                            {item.role}
+                          </h2>
+
+                          <p className="mt-3 max-w-2xl leading-7 text-ink/60">
+                            {item.description}
+                          </p>
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
             </div>

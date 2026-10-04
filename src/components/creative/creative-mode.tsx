@@ -43,14 +43,19 @@ const studies: Array<{
   },
 ];
 
+function seededUnit(index: number, salt: number) {
+  const value = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
+  return value - Math.floor(value);
+}
+
 function Stars() {
   const positions = useMemo(() => {
     const values = new Float32Array(900 * 3);
 
     for (let index = 0; index < 900; index += 1) {
-      const radius = 12 + Math.random() * 26;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const radius = 12 + seededUnit(index, 1) * 26;
+      const theta = seededUnit(index, 2) * Math.PI * 2;
+      const phi = Math.acos(2 * seededUnit(index, 3) - 1);
 
       values[index * 3] = radius * Math.sin(phi) * Math.cos(theta);
       values[index * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
