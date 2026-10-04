@@ -1,7 +1,8 @@
 "use client";
 
 import {
-   OrbitControls,
+  MeshReflectorMaterial,
+  OrbitControls,
   PerspectiveCamera,
   useTexture,
   useVideoTexture,
@@ -23,8 +24,11 @@ type StudyId =
 const RAW_ASSET_BASE =
   "https://raw.githubusercontent.com/Jeanty-Nassau";
 
-const EARTH_TEXTURE =
-  `${RAW_ASSET_BASE}/Interactive-World-ThreeJS/main/static/earth.jpeg`;
+const EARTH_NIGHT_TEXTURE =
+  "https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-night.jpg";
+
+const EARTH_TOPOLOGY_TEXTURE =
+  "https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-topology.png";
 
 const CINEMA_ASSET_BASE =
   `${RAW_ASSET_BASE}/Interactive-CylinderCinema-ThreeJS/main/static`;
@@ -48,7 +52,7 @@ const studies: Array<{
     title: "Orbital Signals",
     eyebrow: "THREE.JS STUDY / 01",
     description:
-      "A stylised Earth study built from the original world map, atmospheric glow, orbital graphics, and a slow passive rotation.",
+      "A night-side Earth reinterpreted as a moving signal object, with topology relief, glowing cities, atmospheric layers, and orbiting traces.",
     hint: "Drag to orbit · Scroll to zoom.",
   },
   {
@@ -56,7 +60,7 @@ const studies: Array<{
     title: "Signal Theatre",
     eyebrow: "THREE.JS STUDY / 02",
     description:
-      "A cylindrical cinema using the original project media, framed one screen at a time from a seated viewing perspective.",
+      "The original curved four-screen cinema, rebuilt inside the portfolio as a rotating room with one screen centred at a time.",
     hint: "Switch screens · Zoom in or out.",
   },
   {
@@ -65,7 +69,7 @@ const studies: Array<{
     eyebrow: "THREE.JS STUDY / 03",
     description:
       "A radar-like signal terrain built from animated displacement, contour bands, scan energy, and pointer-driven pulses.",
-    hint: "Move the pointer to send a pulse through the field.",
+    hint: "Move to bend the field · Click anywhere to send a signal pulse.",
   },
 ];
 
@@ -119,142 +123,46 @@ function Stars() {
   );
 }
 
-const earthVertex = `
-  varying vec2 vUv;
-  varying vec3 vNormal;
-
-  void main() {
-    vUv = uv;
-    vNormal = normalize(normalMatrix * normal);
-
-    gl_Position =
-      projectionMatrix *
-      modelViewMatrix *
-      vec4(position, 1.0);
-  }
-`;
-
-const earthFragment = `
-  uniform sampler2D uMap;
-  uniform float uTime;
-
-  varying vec2 vUv;
-  varying vec3 vNormal;
-
-  void main() {
-    vec3 source = texture2D(uMap, vUv).rgb;
-
-    float luminance =
-      dot(source, vec3(0.299, 0.587, 0.114));
-
-    float landMask = smoothstep(
-      0.24,
-      0.68,
-      luminance + (source.g - source.b) * 0.22
-    );
-
-    vec3 ocean = vec3(0.012, 0.035, 0.18);
-    vec3 landLow = vec3(0.12, 0.28, 1.0);
-    vec3 landHigh = vec3(0.92, 0.95, 1.0);
-
-    vec3 land = mix(
-      landLow,
-      landHigh,
-      smoothstep(0.28, 0.84, luminance)
-    );
-
-    vec3 color = mix(ocean, land, landMask);
-
-    vec3 normal = normalize(vNormal);
-
-    float light =
-      max(dot(normal, normalize(vec3(0.45, 0.28, 1.0))), 0.0);
-
-    color *= 0.42 + light * 0.88;
-
-    float night = pow(1.0 - light, 2.4);
-    float citySignal =
-      smoothstep(0.7, 0.94, luminance) * night;
-
-    color +=
-      vec3(1.0, 0.34, 0.03) *
-      citySignal *
-      2.2;
-
-    float rim =
-      pow(1.0 - abs(dot(normal, vec3(0.0, 0.0, 1.0))), 3.0);
-
-    color +=
-      vec3(0.04, 0.2, 1.0) *
-      rim *
-      1.1;
-
-    float lon =
-      abs(fract(vUv.x * 18.0) - 0.5);
-
-    float lat =
-      abs(fract(vUv.y * 10.0) - 0.5);
-
-    float grid =
-      1.0 -
-      smoothstep(
-        0.455,
-        0.5,
-        min(lon, lat)
-      );
-
-    color +=
-      vec3(0.12, 0.32, 1.0) *
-      grid *
-      0.18;
-
-    float scanCenter =
-      fract(uTime * 0.055);
-
-    float scan =
-      1.0 -
-      smoothstep(
-        0.0,
-        0.035,
-        abs(vUv.y - scanCenter)
-      );
-
-    color +=
-      vec3(1.0, 0.38, 0.03) *
-      scan *
-      landMask *
-      1.25;
-
-    gl_FragColor = vec4(color, 1.0);
-  }
-`;
-
 function OrbitalSignals() {
-  const texture = useTexture(EARTH_TEXTURE);
+  const [nightTextureSource, topologyTextureSource] = useTexture([
+    EARTH_NIGHT_TEXTURE,
+    EARTH_TOPOLOGY_TEXTURE,
+  ]);
+
+  const nightTexture = useMemo(() => {
+    const clone = nightTextureSource.clone();
+    clone.colorSpace = THREE.SRGBColorSpace;
+    clone.anisotropy = 8;
+    clone.needsUpdate = true;
+    return clone;
+  }, [nightTextureSource]);
+
+  const topologyTexture = useMemo(() => {
+    const clone = topologyTextureSource.clone();
+    clone.anisotropy = 8;
+    clone.needsUpdate = true;
+    return clone;
+  }, [topologyTextureSource]);
+
   const earth = useRef<THREE.Mesh>(null);
-  const earthMaterial = useRef<THREE.ShaderMaterial>(null);
   const orbitRig = useRef<THREE.Group>(null);
 
-  const uniforms = useMemo(
-    () => ({
-      uMap: { value: texture },
-      uTime: { value: 0 },
-    }),
-    [texture],
-  );
+  useEffect(() => {
+    return () => {
+      nightTexture.dispose();
+      topologyTexture.dispose();
+    };
+  }, [nightTexture, topologyTexture]);
 
   useFrame((state, delta) => {
-    if (earthMaterial.current) {
-      earthMaterial.current.uniforms.uTime.value =
-        state.clock.elapsedTime;
-    }
     if (earth.current) {
       earth.current.rotation.y += delta * 0.045;
     }
 
     if (orbitRig.current) {
-      orbitRig.current.rotation.y += delta * 0.11;
-      orbitRig.current.rotation.z += delta * 0.025;
+      orbitRig.current.rotation.y += delta * 0.12;
+      orbitRig.current.rotation.z =
+        Math.sin(state.clock.elapsedTime * 0.18) * 0.08;
     }
   });
 
@@ -264,92 +172,127 @@ function OrbitalSignals() {
 
       <group rotation={[0, 0, THREE.MathUtils.degToRad(-23.4)]}>
         <mesh ref={earth}>
-          <sphereGeometry args={[2.05, 128, 128]} />
-          <shaderMaterial
-            ref={earthMaterial}
-            vertexShader={earthVertex}
-            fragmentShader={earthFragment}
-            uniforms={uniforms}
+          <sphereGeometry args={[2.08, 128, 128]} />
+
+          <meshStandardMaterial
+            map={nightTexture}
+            bumpMap={topologyTexture}
+            bumpScale={0.11}
+            color="#91a7ff"
+            emissive="#ff6a00"
+            emissiveMap={nightTexture}
+            emissiveIntensity={0.72}
+            roughness={0.68}
+            metalness={0.08}
           />
         </mesh>
 
-        <mesh scale={1.035}>
-          <sphereGeometry args={[2.05, 48, 48]} />
+        <mesh scale={1.016}>
+          <sphereGeometry args={[2.08, 52, 52]} />
+
           <meshBasicMaterial
             color="#91a7ff"
             wireframe
             transparent
-            opacity={0.07}
+            opacity={0.055}
+            blending={THREE.AdditiveBlending}
           />
         </mesh>
 
-        <mesh scale={1.09}>
-          <sphereGeometry args={[2.05, 72, 72]} />
+        <mesh scale={1.095}>
+          <sphereGeometry args={[2.08, 72, 72]} />
+
           <meshBasicMaterial
             color="#1847ff"
             transparent
-            opacity={0.12}
+            opacity={0.13}
             side={THREE.BackSide}
             blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+
+        <mesh scale={1.13}>
+          <sphereGeometry args={[2.08, 64, 64]} />
+
+          <meshBasicMaterial
+            color="#91a7ff"
+            transparent
+            opacity={0.035}
+            side={THREE.BackSide}
           />
         </mesh>
       </group>
 
       <group ref={orbitRig}>
-        <mesh rotation={[Math.PI / 2.25, 0.1, 0.2]}>
-          <torusGeometry args={[2.8, 0.012, 10, 220]} />
+        <mesh rotation={[Math.PI / 2.2, 0.12, 0.18]}>
+          <torusGeometry args={[2.82, 0.014, 10, 240]} />
+
           <meshBasicMaterial
             color="#ff991c"
             transparent
-            opacity={0.72}
+            opacity={0.82}
           />
         </mesh>
 
-        <mesh rotation={[1.0, 0.4, 0.7]}>
-          <torusGeometry args={[3.25, 0.006, 8, 220]} />
+        <mesh rotation={[1.02, 0.52, 0.78]}>
+          <torusGeometry args={[3.28, 0.007, 8, 240]} />
+
           <meshBasicMaterial
             color="#91a7ff"
             transparent
-            opacity={0.38}
+            opacity={0.42}
           />
         </mesh>
 
-        <mesh position={[2.65, 0.85, 0]}>
-          <sphereGeometry args={[0.07, 18, 18]} />
-          <meshBasicMaterial color="#ff991c" />
-        </mesh>
+        <mesh rotation={[0.28, 1.1, 0.36]}>
+          <torusGeometry args={[3.72, 0.004, 8, 260]} />
 
-        <mesh position={[-2.45, -1.15, 0.35]}>
-          <sphereGeometry args={[0.045, 16, 16]} />
-          <meshBasicMaterial color="#91a7ff" />
-        </mesh>
-
-        <mesh rotation={[0.2, 1.15, 0.3]}>
-          <torusGeometry args={[3.7, 0.004, 8, 240]} />
           <meshBasicMaterial
             color="#ff991c"
             transparent
-            opacity={0.2}
+            opacity={0.24}
           />
+        </mesh>
+
+        <mesh position={[2.68, 0.86, 0]}>
+          <sphereGeometry args={[0.075, 18, 18]} />
+          <meshBasicMaterial color="#ff991c" />
+        </mesh>
+
+        <mesh position={[-2.45, -1.18, 0.38]}>
+          <sphereGeometry args={[0.05, 16, 16]} />
+          <meshBasicMaterial color="#91a7ff" />
+        </mesh>
+
+        <mesh position={[0.35, 2.95, -0.45]}>
+          <sphereGeometry args={[0.045, 16, 16]} />
+          <meshBasicMaterial color="#f7f7f2" />
         </mesh>
       </group>
 
-      <ambientLight intensity={0.34} />
-      <directionalLight position={[6, 4, 7]} intensity={1.7} />
+      <ambientLight intensity={0.22} />
+      <directionalLight position={[6, 4, 7]} intensity={1.35} />
+
       <pointLight
-        position={[-6, 1.5, 3]}
-        intensity={18}
+        position={[-5, 1.5, 4]}
+        intensity={22}
         color="#1847ff"
+      />
+
+      <pointLight
+        position={[4, -2, 2]}
+        intensity={12}
+        color="#ff991c"
       />
 
       <OrbitControls
         makeDefault
         enablePan={false}
         enableZoom
-        minDistance={5.4}
+        minDistance={5.2}
         maxDistance={10}
-        minPolarAngle={Math.PI * 0.2}
-        maxPolarAngle={Math.PI * 0.8}
+        minPolarAngle={Math.PI * 0.18}
+        maxPolarAngle={Math.PI * 0.82}
         target={[0, 0, 0]}
       />
     </>
@@ -393,6 +336,10 @@ function SignalTheatre({
   const buildingSource = useTexture(
     `${CINEMA_ASSET_BASE}/building.jpeg`,
   );
+  const floorSource = useTexture(
+    `${CINEMA_ASSET_BASE}/floorTexture.jpg`,
+  );
+
   const building = useMemo(() => {
     const clone = buildingSource.clone();
     clone.colorSpace = THREE.SRGBColorSpace;
@@ -400,32 +347,45 @@ function SignalTheatre({
     return clone;
   }, [buildingSource]);
 
+  const floorTexture = useMemo(() => {
+    const clone = floorSource.clone();
+    clone.colorSpace = THREE.SRGBColorSpace;
+    clone.wrapS = THREE.RepeatWrapping;
+    clone.wrapT = THREE.RepeatWrapping;
+    clone.repeat.set(9, 9);
+    clone.needsUpdate = true;
+    return clone;
+  }, [floorSource]);
+
   useEffect(() => {
     return () => {
       building.dispose();
+      floorTexture.dispose();
     };
-  }, [building]);
+  }, [building, floorTexture]);
 
   const theatre = useRef<THREE.Group>(null);
-  const screenArc = Math.PI / 2 - 0.16;
+  const screenArc = Math.PI / 2;
+  const radius = 3.2;
+  const screenHeight = 2.08;
 
   useFrame(() => {
     if (!theatre.current) return;
 
-    const target = -screenIndex * (Math.PI / 2);
+    const target = screenIndex * (Math.PI / 2);
 
     theatre.current.rotation.y +=
-      (target - theatre.current.rotation.y) * 0.085;
+      (target - theatre.current.rotation.y) * 0.075;
   });
 
-  const textures = [castle, house, sky, building];
+  const textures = [building, castle, house, sky];
 
   return (
     <>
       <PerspectiveCamera
         makeDefault
-        position={[0, 0.28, 0]}
-        rotation={[-0.09, 0, 0]}
+        position={[0, 0.16, 0]}
+        rotation={[-0.085, 0, 0]}
         fov={fov}
         near={0.1}
         far={80}
@@ -434,17 +394,16 @@ function SignalTheatre({
       <group ref={theatre}>
         {textures.map((texture, index) => {
           const thetaStart =
-            Math.PI -
-            screenArc / 2 +
-            index * (Math.PI / 2);
+            -3 * Math.PI / 4 +
+            index * screenArc;
 
           return (
             <mesh key={index}>
               <cylinderGeometry
                 args={[
-                  5,
-                  5,
-                  2.8,
+                  radius,
+                  radius,
+                  screenHeight,
                   96,
                   1,
                   true,
@@ -465,28 +424,40 @@ function SignalTheatre({
 
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
-        position={[0, -1.4, 0]}
+        position={[0, -1.08, 0]}
       >
-        <circleGeometry args={[4.95, 96]} />
+        <circleGeometry args={[3.15, 96]} />
 
-        <meshStandardMaterial
-          color="#11151f"
-          roughness={0.72}
-          metalness={0.1}
+        <MeshReflectorMaterial
+          map={floorTexture}
+          color="#8d91a0"
+          roughness={0.58}
+          metalness={0.22}
+          mirror={0.12}
+          blur={[260, 120]}
+          resolution={512}
+          mixBlur={1}
+          mixStrength={0.24}
         />
       </mesh>
 
-      <ambientLight intensity={0.2} />
+      <ambientLight intensity={0.18} />
 
       <pointLight
-        position={[-1.5, 1.8, 0]}
-        intensity={16}
+        position={[0, 2.8, 1.5]}
+        intensity={14}
+        color="#c1b5eb"
+      />
+
+      <pointLight
+        position={[-2.5, 0.8, 1.6]}
+        intensity={7}
         color="#1847ff"
       />
 
       <pointLight
-        position={[1.8, 1.1, 0.5]}
-        intensity={9}
+        position={[2.3, 0.4, 1.2]}
+        intensity={5}
         color="#ff991c"
       />
     </>
@@ -496,11 +467,14 @@ function SignalTheatre({
 const waveVertex = `
   uniform float uTime;
   uniform vec2 uPointer;
+  uniform vec2 uClickCenter;
+  uniform float uClickAge;
 
   varying vec2 vUv;
   varying float vHeight;
   varying float vPulse;
   varying float vSweep;
+  varying float vClickPulse;
 
   void main() {
     vec3 p = position;
@@ -511,6 +485,9 @@ const waveVertex = `
 
     float radial =
       distance(uv, pointerUv);
+
+    float clickRadial =
+      distance(uv, uClickCenter);
 
     float waveA =
       sin((p.x * 1.75) + uTime * 0.95) * 0.2;
@@ -524,13 +501,33 @@ const waveVertex = `
         uTime * 1.15
       ) * 0.11;
 
-    float ripple =
+    float pointerRipple =
       sin(
         radial * 34.0 -
         uTime * 3.3
       ) *
       exp(-radial * 5.4) *
-      0.28;
+      0.24;
+
+    float clickRadius =
+      max(uClickAge, 0.0) * 0.34;
+
+    float clickRing =
+      exp(
+        -pow(
+          (clickRadial - clickRadius) * 32.0,
+          2.0
+        )
+      ) *
+      exp(-max(uClickAge, 0.0) * 0.85);
+
+    float clickWave =
+      sin(
+        clickRadial * 46.0 -
+        uClickAge * 8.0
+      ) *
+      clickRing *
+      0.6;
 
     float sweepPhase =
       fract(uTime * 0.115);
@@ -545,12 +542,14 @@ const waveVertex = `
       waveA +
       waveB +
       diagonal +
-      ripple +
+      pointerRipple +
+      clickWave +
       sweep * 0.12;
 
     vHeight = p.z;
     vPulse = exp(-radial * 6.0);
     vSweep = sweep;
+    vClickPulse = clickRing;
 
     gl_Position =
       projectionMatrix *
@@ -566,6 +565,7 @@ const waveFragment = `
   varying float vHeight;
   varying float vPulse;
   varying float vSweep;
+  varying float vClickPulse;
 
   void main() {
     vec3 deep =
@@ -636,17 +636,22 @@ const waveFragment = `
     color +=
       vec3(1.0, 0.28, 0.02) *
       hotPeak *
-      0.55;
+      0.48;
 
     color +=
       vec3(1.0, 0.42, 0.04) *
       vPulse *
-      0.82;
+      0.72;
 
     color +=
       vec3(1.0, 0.5, 0.08) *
       vSweep *
-      0.95;
+      0.9;
+
+    color +=
+      vec3(1.0, 0.78, 0.25) *
+      vClickPulse *
+      1.65;
 
     float edgeFade =
       smoothstep(
@@ -674,6 +679,7 @@ const waveFragment = `
 const waveWireFragment = `
   varying float vPulse;
   varying float vSweep;
+  varying float vClickPulse;
 
   void main() {
     vec3 base =
@@ -681,7 +687,11 @@ const waveWireFragment = `
 
     vec3 pulse =
       vec3(1.0, 0.45, 0.05) *
-      (vPulse * 0.7 + vSweep * 0.55);
+      (
+        vPulse * 0.62 +
+        vSweep * 0.5 +
+        vClickPulse * 1.45
+      );
 
     gl_FragColor =
       vec4(base + pulse, 0.16);
@@ -695,14 +705,24 @@ function DisplacementField() {
     useRef<THREE.ShaderMaterial>(null);
   const wireMaterial =
     useRef<THREE.ShaderMaterial>(null);
+  const pulseCenter =
+    useRef(new THREE.Vector2(0.5, 0.5));
+  const pulseStartedAt =
+    useRef(-100);
 
-  const { pointer } = useThree();
+  const { gl, pointer } = useThree();
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
       uPointer: {
         value: new THREE.Vector2(),
+      },
+      uClickCenter: {
+        value: new THREE.Vector2(0.5, 0.5),
+      },
+      uClickAge: {
+        value: 100,
       },
     }),
     [],
@@ -718,44 +738,110 @@ function DisplacementField() {
     [],
   );
 
+  useEffect(() => {
+    const element = gl.domElement;
+
+    const handlePointerDown = (
+      event: PointerEvent,
+    ) => {
+      const rect =
+        element.getBoundingClientRect();
+
+      const x =
+        (event.clientX - rect.left) /
+        rect.width;
+
+      const y =
+        1 -
+        (event.clientY - rect.top) /
+        rect.height;
+
+      pulseCenter.current.set(x, y);
+      pulseStartedAt.current =
+        performance.now() / 1000;
+    };
+
+    element.addEventListener(
+      "pointerdown",
+      handlePointerDown,
+    );
+
+    return () => {
+      element.removeEventListener(
+        "pointerdown",
+        handlePointerDown,
+      );
+    };
+  }, [gl]);
+
   useFrame((state) => {
+    const now =
+      state.clock.elapsedTime;
+
+    const clickAge =
+      Math.max(
+        0,
+        performance.now() / 1000 -
+          pulseStartedAt.current,
+      );
+
     if (surfaceMaterial.current) {
       surfaceMaterial.current.uniforms.uTime.value =
-        state.clock.elapsedTime;
+        now;
 
       surfaceMaterial.current.uniforms.uPointer.value.set(
         pointer.x,
         pointer.y,
       );
+
+      surfaceMaterial.current.uniforms.uClickCenter.value.copy(
+        pulseCenter.current,
+      );
+
+      surfaceMaterial.current.uniforms.uClickAge.value =
+        clickAge;
     }
 
     if (wireMaterial.current) {
       wireMaterial.current.uniforms.uTime.value =
-        state.clock.elapsedTime;
+        now;
 
       wireMaterial.current.uniforms.uPointer.value.set(
         pointer.x,
         pointer.y,
       );
+
+      wireMaterial.current.uniforms.uClickCenter.value.copy(
+        pulseCenter.current,
+      );
+
+      wireMaterial.current.uniforms.uClickAge.value =
+        clickAge;
     }
 
     if (group.current) {
       group.current.rotation.z +=
-        (pointer.x * 0.1 -
+        (pointer.x * 0.16 -
           group.current.rotation.z) *
-        0.035;
+        0.04;
 
       group.current.rotation.x +=
-        (-0.86 -
-          pointer.y * 0.055 -
+        (-0.84 -
+          pointer.y * 0.085 -
           group.current.rotation.x) *
+        0.04;
+
+      group.current.position.x +=
+        (0.85 +
+          pointer.x * 0.22 -
+          group.current.position.x) *
         0.035;
 
       group.current.position.y +=
         (-0.5 -
-          pointer.y * 0.12 -
+          pointer.y * 0.2 -
           group.current.position.y) *
-        0.03;
+        0.035;
     }
   });
 
@@ -763,12 +849,12 @@ function DisplacementField() {
     <>
       <group
         ref={group}
-        rotation={[-0.86, 0, 0]}
-        position={[1.0, -0.5, 0]}
+        rotation={[-0.84, 0, 0]}
+        position={[0.85, -0.5, 0]}
       >
         <mesh>
           <planeGeometry
-            args={[7.8, 7.8, 180, 180]}
+            args={[8.1, 8.1, 190, 190]}
           />
 
           <shaderMaterial
@@ -781,9 +867,9 @@ function DisplacementField() {
           />
         </mesh>
 
-        <mesh position={[0, 0, 0.025]}>
+        <mesh position={[0, 0, 0.028]}>
           <planeGeometry
-            args={[7.8, 7.8, 84, 84]}
+            args={[8.1, 8.1, 90, 90]}
           />
 
           <shaderMaterial
