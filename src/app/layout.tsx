@@ -28,15 +28,10 @@ export const metadata: Metadata = {
   description:
     "Software Developer in Cape Town focused on backend systems, distributed systems, .NET, AWS, Kafka, PostgreSQL, and creative coding.",
 
-  alternates: {
-    canonical: "/",
-  },
-
   openGraph: {
     title: "Jeanty Nassau — Software Developer",
     description:
       "Backend and distributed systems engineer with a creative-coding side.",
-    url: "/",
     type: "website",
     locale: "en_ZA",
     siteName: "Jeanty Nassau",
@@ -69,9 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SmoothScroll>
-          <PageTransitionProvider>
-            {children}
-          </PageTransitionProvider>
+          <PageTransitionProvider>{children}</PageTransitionProvider>
         </SmoothScroll>
       </body>
     </html>
