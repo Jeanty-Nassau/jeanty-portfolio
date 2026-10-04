@@ -124,21 +124,34 @@ function Stars() {
 }
 
 function OrbitalSignals() {
-  const [nightTexture, topologyTexture] = useTexture([
+  const [nightTextureSource, topologyTextureSource] = useTexture([
     EARTH_NIGHT_TEXTURE,
     EARTH_TOPOLOGY_TEXTURE,
   ]);
+
+  const nightTexture = useMemo(() => {
+    const clone = nightTextureSource.clone();
+    clone.colorSpace = THREE.SRGBColorSpace;
+    clone.anisotropy = 8;
+    clone.needsUpdate = true;
+    return clone;
+  }, [nightTextureSource]);
+
+  const topologyTexture = useMemo(() => {
+    const clone = topologyTextureSource.clone();
+    clone.anisotropy = 8;
+    clone.needsUpdate = true;
+    return clone;
+  }, [topologyTextureSource]);
 
   const earth = useRef<THREE.Mesh>(null);
   const orbitRig = useRef<THREE.Group>(null);
 
   useEffect(() => {
-    nightTexture.colorSpace = THREE.SRGBColorSpace;
-    nightTexture.anisotropy = 8;
-    nightTexture.needsUpdate = true;
-
-    topologyTexture.anisotropy = 8;
-    topologyTexture.needsUpdate = true;
+    return () => {
+      nightTexture.dispose();
+      topologyTexture.dispose();
+    };
   }, [nightTexture, topologyTexture]);
 
   useFrame((state, delta) => {
