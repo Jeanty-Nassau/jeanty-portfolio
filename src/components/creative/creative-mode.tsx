@@ -365,7 +365,7 @@ function SignalTheatre({
   }, [building, floorTexture]);
 
   const theatre = useRef<THREE.Group>(null);
-  const screenArc = Math.PI / 2;
+  const screenArc = Math.PI / 2 - 0.06;
   const radius = 3.2;
   const screenHeight = 2.08;
 
@@ -433,11 +433,11 @@ function SignalTheatre({
           color="#8d91a0"
           roughness={0.58}
           metalness={0.22}
-          mirror={0.12}
+          mirror={0.2}
           blur={[260, 120]}
           resolution={512}
           mixBlur={1}
-          mixStrength={0.24}
+          mixStrength={0.34}
         />
       </mesh>
 
@@ -980,7 +980,7 @@ export function CreativeMode() {
   const [cinemaScreen, setCinemaScreen] =
     useState(0);
   const [cinemaFov, setCinemaFov] =
-    useState(52);
+    useState(68);
 
   const selected =
     studies.find((item) => item.id === study) ??
@@ -1024,7 +1024,7 @@ export function CreativeMode() {
       CINEMA_SCREENS.length;
 
     setCinemaScreen(normalized);
-    setCinemaFov(52);
+    setCinemaFov(68);
   }
 
   function changeCinemaZoom(delta: number) {
@@ -1191,7 +1191,7 @@ export function CreativeMode() {
                     onClick={() => {
                       setStudy(item.id);
                       setCinemaScreen(0);
-                      setCinemaFov(52);
+                      setCinemaFov(68);
                     }}
                     className={[
                       "shrink-0 border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.13em] transition-all",
