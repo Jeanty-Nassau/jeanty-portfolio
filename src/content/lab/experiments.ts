@@ -5,8 +5,8 @@ export const labExperiments: LabExperiment[] = [
     slug: "orbital-signals",
     title: "Orbital Signals",
     summary:
-      "A stylised interactive Earth study exploring atmosphere, orbital motion, mapped surfaces, and camera interaction.",
-    technologies: ["Three.js", "WebGL", "GLSL", "Shaders"],
+      "A night-side Earth study with topology relief, city-light emission, layered atmosphere, orbit traces, passive spin, and camera controls.",
+    technologies: ["Three.js", "WebGL", "Mapped Earth", "Orbit Controls"],
     year: "2022 / 2026",
     status: "complete",
     featured: true,
@@ -15,7 +15,7 @@ export const labExperiments: LabExperiment[] = [
     slug: "signal-theatre",
     title: "Signal Theatre",
     summary:
-      "A cylindrical cinema built from curved media surfaces, original video assets, reflection, and focused screen-to-screen interaction.",
+      "A rotating four-screen cinema built from the original media assets, curved cylinder geometry, textured reflective flooring, screen-to-screen controls, and zoom.",
     technologies: ["Three.js", "Video Textures", "Reflection", "Interaction"],
     year: "2022 / 2026",
     status: "complete",
@@ -25,8 +25,8 @@ export const labExperiments: LabExperiment[] = [
     slug: "displacement-field",
     title: "Displacement Field",
     summary:
-      "A terrain study using displacement, lighting, and pointer input to explore responsive surface depth.",
-    technologies: ["Three.js", "Displacement", "Lighting", "Pointer Input"],
+      "A radar-like signal terrain with animated displacement, contour bands, scan energy, pointer-driven tilt, and click-triggered pulses.",
+    technologies: ["Three.js", "GLSL", "Displacement", "Pointer / Click Input"],
     year: "2022 / 2026",
     status: "complete",
     featured: true,
