@@ -5,7 +5,7 @@ Personal portfolio for Jeanty Nassau, a software developer focused on backend sy
 The site is intentionally split between two sides of my work:
 
 - **Engineering:** .NET, Kafka, AWS, PostgreSQL, reliability, event-driven systems, and production-oriented backend work.
-- **Creative code:** Three.js, motion, interaction, generative experiments, and visual systems.
+- **Creative code:** Three.js, WebGL, motion, interaction, shaders, and procedural graphics.
 
 ## Stack
 
@@ -17,34 +17,6 @@ The site is intentionally split between two sides of my work:
 - Lenis
 - Three.js / React Three Fiber
 - MDX
-
-## Highlights
-
-- Interactive ASCII portrait generated from a prepared image source
-- Custom route transitions
-- Smooth scrolling and reduced-motion support
-- Project case studies
-- Creative-coding Lab
-- MDX notes
-- Custom loading and 404 states
-
-## Local development
-
-```bash
-pnpm install
-pnpm dev
-```
-
-Then open `http://localhost:3000`.
-
-Useful commands:
-
-```bash
-pnpm lint
-pnpm test:run
-pnpm build
-pnpm test:e2e
-```
 
 ## Featured work
 
@@ -62,6 +34,46 @@ Live demo: https://nassau-wedding.vercel.app/
 
 Repository: https://github.com/Jeanty-Nassau/wedding-website
 
-## Status
+### Creative Studies
 
-The portfolio is in its final pre-launch polish phase. The remaining work is primarily final project imagery, creative-coding Lab consolidation, responsive/accessibility QA, and deployment hardening.
+A five-study Three.js collection covering shaders, procedural geometry, video textures, displacement, noise, particles, and scroll choreography:
+
+- Orbital Signals
+- Signal Theatre
+- Displacement Field
+- Noise Field
+- Scroll Studies
+
+## Portfolio details
+
+- interactive ASCII portrait
+- custom route transitions
+- reduced-motion support
+- project case studies
+- creative-coding Lab
+- MDX notes
+- custom loading and 404 states
+- Open Graph metadata
+- sitemap and robots metadata
+- Playwright smoke coverage
+- GitHub Actions CI
+
+## Local development
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Then open `http://localhost:3000`.
+
+Useful commands:
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm build
+pnpm test:e2e
+```
+
+The portfolio intentionally keeps the presentation concise. Deep technical detail lives in the individual project repositories.
