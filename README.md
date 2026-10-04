@@ -36,13 +36,12 @@ Repository: https://github.com/Jeanty-Nassau/wedding-website
 
 ### Creative Studies
 
-A five-study Three.js collection covering shaders, procedural geometry, video textures, displacement, noise, particles, and scroll choreography:
+A three-study Three.js collection covering shaders, procedural geometry, video textures, displacement, noise, particles, and scroll choreography:
 
 - Orbital Signals
 - Signal Theatre
 - Displacement Field
-- Noise Field
-- Scroll Studies
+
 
 ## Portfolio details
 
