@@ -40,12 +40,8 @@ export function Hero() {
 
             <p className="mt-10 max-w-2xl text-lg leading-8 text-paper/85 md:text-xl">
               Software developer working on .NET, Kafka, AWS, and PostgreSQL
-              systems at production scale. Outside work, I build complete
-              products and interactive graphics experiments.
-            </p>
-
-            <p className="mt-6 max-w-2xl font-mono text-[10px] font-bold uppercase leading-6 tracking-[0.14em] text-orange">
-              Production context / 50–90M events per day / ~1.3–1.5K events per second at peak
+              systems in production. Outside work, I build complete products
+              and interactive graphics experiments.
             </p>
           </div>
         </div>

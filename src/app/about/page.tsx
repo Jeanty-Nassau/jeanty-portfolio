@@ -16,24 +16,6 @@ const stack = [
   "Three.js",
 ];
 
-const productionContext = [
-  {
-    value: "50–90M",
-    label: "Events / day",
-    detail: "Production ingestion systems I contribute to",
-  },
-  {
-    value: "1.3–1.5K",
-    label: "Events / sec",
-    detail: "Observed peak throughput",
-  },
-  {
-    value: "0.0011%",
-    label: "Exception rate",
-    detail: "Verified seven-day observation window",
-  },
-];
-
 const timeline = [
   {
     period: "2023 — 2025",
@@ -87,31 +69,6 @@ export default function AboutPage() {
                   integrations, and change all meet.
                 </p>
               </div>
-            </div>
-          </Container>
-        </section>
-
-        <section className="bg-paper py-14 text-ink md:py-16">
-          <Container>
-            <div className="grid border-y border-ink/15 md:grid-cols-3">
-              {productionContext.map((item) => (
-                <div
-                  key={item.label}
-                  className="border-b border-ink/15 py-7 md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0"
-                >
-                  <p className="text-4xl font-medium tracking-[-0.045em] text-cobalt">
-                    {item.value}
-                  </p>
-
-                  <p className="mt-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
-                    {item.label}
-                  </p>
-
-                  <p className="mt-3 max-w-xs text-sm leading-6 text-ink/50">
-                    {item.detail}
-                  </p>
-                </div>
-              ))}
             </div>
           </Container>
         </section>

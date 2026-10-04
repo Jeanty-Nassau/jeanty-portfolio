@@ -169,3 +169,48 @@ img[data-monochrome="true"] {
     animation: none;
   }
 }
+
+
+/* Theme surfaces: cobalt stays constant. Dark mode changes the editorial
+   paper/ink surfaces without weakening the site's core color identity. */
+html[data-theme="dark"] body {
+  background: #07090d;
+}
+
+html[data-theme="dark"] .bg-paper {
+  background-color: #0d1016 !important;
+}
+
+html[data-theme="dark"] .text-ink {
+  color: #f7f7f2 !important;
+}
+
+html[data-theme="dark"] [class*="text-ink/"] {
+  color: rgba(247, 247, 242, 0.64);
+}
+
+html[data-theme="dark"] [class*="border-ink/"] {
+  border-color: rgba(247, 247, 242, 0.16);
+}
+
+html[data-theme="dark"] [class*="bg-ink/"] {
+  background-color: rgba(5, 7, 11, 0.82);
+}
+
+html[data-theme="dark"] .bg-ink {
+  background-color: #05070b !important;
+}
+
+html[data-theme="dark"] .text-cobalt {
+  color: #91a7ff !important;
+}
+
+html[data-theme="dark"] body::before {
+  opacity: 0.072;
+}
+
+@media (prefers-contrast: more) {
+  body::before {
+    opacity: 0.04;
+  }
+}
