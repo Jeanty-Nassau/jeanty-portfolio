@@ -24,7 +24,7 @@ export function SelectedWork() {
           <Reveal className="lg:col-span-8">
             <div>
               <h2 className="max-w-4xl text-4xl font-medium leading-[0.98] tracking-[-0.045em] sm:text-5xl lg:text-7xl">
-                Two projects. Two different kinds of proof.
+                Two projects. Two different kinds of <span className="text-cobalt">proof.</span>
               </h2>
 
               <p className="mt-8 max-w-2xl text-lg leading-8 text-ink/60">
@@ -47,9 +47,10 @@ export function SelectedWork() {
         <div className="mt-10 flex justify-end">
           <Link
             href="/work"
-            className="font-mono text-xs uppercase tracking-[0.16em] underline decoration-ink/30 underline-offset-8 hover:decoration-ink"
+            className="group inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-cobalt transition-colors hover:text-orange"
           >
             View work
+            <span className="transition-transform duration-300 group-hover:translate-x-1">↗</span>
           </Link>
         </div>
       </Container>

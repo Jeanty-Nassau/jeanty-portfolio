@@ -68,7 +68,7 @@ export function Header({
           >
             <Link
               href="/"
-              className="font-medium tracking-[-0.03em]"
+              className="font-medium tracking-[-0.03em] transition-colors hover:text-orange"
               onClick={() => setMenuOpen(false)}
             >
               JEANTY NASSAU
@@ -92,24 +92,25 @@ export function Header({
                     key={item.href}
                     href={item.href}
                     className={[
-                      "relative font-mono text-[11px] uppercase tracking-[0.14em] transition-colors",
+                      "group relative font-mono text-[11px] font-semibold uppercase tracking-[0.14em] transition-colors hover:text-orange",
                       isLight
                         ? active
                           ? "text-ink"
-                          : "text-ink/50 hover:text-ink"
+                          : "text-ink/50"
                         : active
                           ? "text-paper"
-                          : "text-paper/60 hover:text-paper",
+                          : "text-paper/60",
                     ].join(" ")}
                   >
                     {item.label}
 
-                    {active && (
-                      <span
-                        className="absolute -bottom-2 left-0 h-1 w-1 rounded-full bg-orange"
-                        aria-hidden="true"
-                      />
-                    )}
+                    <span
+                      className={[
+                        "absolute -bottom-2 left-0 h-[2px] bg-orange transition-all duration-300",
+                        active ? "w-full" : "w-0 group-hover:w-full",
+                      ].join(" ")}
+                      aria-hidden="true"
+                    />
                   </Link>
                 );
               })}
@@ -117,7 +118,7 @@ export function Header({
 
             <button
               type="button"
-              className="font-mono text-xs uppercase tracking-[0.14em] md:hidden"
+              className="font-mono text-xs font-semibold uppercase tracking-[0.14em] transition-colors hover:text-orange md:hidden"
               onClick={() => setMenuOpen((current) => !current)}
               aria-expanded={menuOpen}
               aria-controls="mobile-navigation"
@@ -140,13 +141,13 @@ export function Header({
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="group flex items-baseline justify-between border-b border-paper/20 py-4"
+                  className="group flex items-baseline justify-between border-b border-paper/20 py-4 transition-colors hover:border-orange"
                 >
-                  <span className="text-4xl font-medium tracking-[-0.04em]">
+                  <span className="text-4xl font-medium tracking-[-0.04em] transition-colors group-hover:text-orange">
                     {item.label}
                   </span>
 
-                  <span className="font-mono text-xs text-paper/35">
+                  <span className="font-mono text-xs font-bold text-orange">
                     {String(index + 1).padStart(2, "0")}
                   </span>
                 </Link>
