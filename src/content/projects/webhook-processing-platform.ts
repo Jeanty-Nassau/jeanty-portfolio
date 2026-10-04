@@ -4,7 +4,7 @@ export const webhookProcessingCaseStudy: CaseStudy = {
   projectSlug: "webhook-processing-platform",
 
   intro:
-    "A public .NET reference implementation of a durable asynchronous event-processing pipeline, built to make failure semantics explicit rather than hide them behind a simple happy-path Kafka demo.",
+    "A public .NET reference implementation of a durable asynchronous event-processing pipeline, focused on the failure modes that matter after a message has been published.",
 
   metrics: [
     {
@@ -26,75 +26,56 @@ export const webhookProcessingCaseStudy: CaseStudy = {
 
   sections: [
     {
-      eyebrow: "Problem",
-      title: "The difficult part starts after an event is published",
-      body: [
-        "Event-driven systems become interesting when delivery is duplicated, consumers crash between side effects and offset commits, downstream processing fails, or poison messages repeatedly return to the same consumer.",
-
-        "This project was designed around those failure windows. The domain itself is intentionally small so the repository can focus on delivery semantics, recoverability, observability, and operational behaviour.",
-      ],
-    },
-
-    {
       eyebrow: "Reliability",
-      title: "At-least-once delivery with explicit idempotency",
+      title: "Duplicate delivery is expected, not exceptional",
       body: [
-        "The processor treats duplicate delivery as expected behaviour rather than an exceptional case. EventId is the application idempotency key, enforced by PostgreSQL so a crash after persistence but before offset commit can safely result in redelivery.",
+        "The processor implements at-least-once delivery with PostgreSQL-enforced idempotency, so a crash after persistence but before offset commit can safely result in redelivery.",
 
-        "The project deliberately does not claim exactly-once processing. Broker guarantees do not automatically make arbitrary external side effects exactly once, so the reliability model is expressed in application terms that can be tested and reasoned about.",
+        "The project deliberately avoids an exactly-once claim. Its guarantees are expressed in application terms that can be demonstrated and tested.",
       ],
     },
 
     {
       eyebrow: "Failure handling",
-      title: "Retries are durable state, not sleeping consumers",
+      title: "Retries are durable state",
       body: [
-        "Retryable failures are persisted with a next-attempt timestamp. A separate retry dispatcher safely claims due rows with PostgreSQL locking semantics and republishes them only when they are ready.",
+        "Retryable failures are persisted with a next-attempt timestamp and handled by a separate dispatcher rather than by sleeping consumers.",
 
-        "Permanent failures and exhausted retries are published to a dead-letter topic. Source offsets are committed only after the relevant durable action succeeds, preserving recoverability when PostgreSQL or the broker is unavailable.",
+        "Permanent failures and exhausted retries move to a dead-letter topic, with source offsets committed only after the relevant durable action succeeds.",
       ],
     },
 
     {
       eyebrow: "Operations",
-      title: "Designed to be inspected while it is failing",
+      title: "The system is designed to be inspected while it fails",
       body: [
-        "The local stack includes Redpanda, PostgreSQL, OpenTelemetry Collector, Prometheus, Tempo, and Grafana. Custom telemetry exposes ingestion, processing, duplicate, retry, and dead-letter behaviour without introducing high-cardinality identifiers.",
+        "The local stack includes Redpanda, PostgreSQL, OpenTelemetry Collector, Prometheus, Tempo, and Grafana.",
 
-        "Integration tests use real disposable Kafka-compatible and PostgreSQL containers, and the repository includes repeatable scripts for duplicates, retries, dead-letter scenarios, consumer scaling, smoke tests, and load testing.",
+        "Container-backed integration tests, failure-simulation scripts, smoke tests, and a k6 workload make the reliability model repeatable rather than just documented.",
       ],
     },
   ],
 
   contributions: [
     {
-      title: "Explicit delivery semantics",
+      title: "Delivery semantics",
       description:
-        "Implemented at-least-once processing with database-enforced idempotency so duplicate Kafka delivery does not duplicate logical side effects.",
+        "At-least-once processing with database-enforced idempotency for safe redelivery.",
     },
-
     {
-      title: "Durable delayed retries",
+      title: "Durable retries",
       description:
-        "Separated retry scheduling from consumer execution using PostgreSQL-backed retry state and a dispatcher that safely claims and republishes due work.",
+        "PostgreSQL-backed retry scheduling with a separate dispatcher for due work.",
     },
-
     {
-      title: "Recoverable dead-letter handling",
+      title: "Dead-letter recovery",
       description:
-        "Ensured malformed, unsupported, permanent, and retry-exhausted events reach a dead-letter topic without prematurely committing their source offsets.",
+        "Permanent and exhausted events reach a DLQ without prematurely committing source offsets.",
     },
-
     {
       title: "Operational visibility",
       description:
-        "Instrumented the pipeline with OpenTelemetry traces and metrics and provisioned a local Prometheus, Tempo, and Grafana stack.",
-    },
-
-    {
-      title: "Repeatable verification",
-      description:
-        "Added container-backed integration tests, failure-simulation scripts, smoke tests, and a k6 workload with a documented benchmark methodology.",
+        "OpenTelemetry, Prometheus, Tempo, Grafana, integration tests, and repeatable failure scenarios.",
     },
   ],
 
