@@ -9,51 +9,51 @@ const nodes = [
   {
     id: "sources",
     label: "Event Sources",
-    x: 80,
+    x: 70,
     y: 150,
     width: 150,
   },
   {
-    id: "ingress",
-    label: "Ingress",
-    x: 290,
+    id: "api",
+    label: "Ingestion API",
+    x: 275,
     y: 150,
-    width: 130,
+    width: 150,
   },
   {
-    id: "kafka",
-    label: "Kafka",
-    x: 480,
-    y: 150,
-    width: 130,
-  },
-  {
-    id: "consumer",
-    label: "Consumers",
-    x: 670,
+    id: "broker",
+    label: "Kafka API",
+    x: 485,
     y: 150,
     width: 140,
   },
   {
-    id: "services",
-    label: "Processing",
-    x: 870,
+    id: "processor",
+    label: "Processor",
+    x: 685,
     y: 150,
-    width: 150,
+    width: 145,
   },
   {
     id: "database",
     label: "PostgreSQL",
-    x: 1080,
+    x: 900,
     y: 150,
-    width: 160,
+    width: 155,
   },
   {
-    id: "alerts",
-    label: "Alerts",
-    x: 870,
-    y: 320,
-    width: 150,
+    id: "retry",
+    label: "Retry Dispatcher",
+    x: 900,
+    y: 315,
+    width: 175,
+  },
+  {
+    id: "dlq",
+    label: "Dead Letter",
+    x: 685,
+    y: 315,
+    width: 145,
   },
 ];
 
@@ -96,7 +96,7 @@ function Node({
 }
 
 export function WebhookArchitecture() {
-    const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <section className="overflow-hidden bg-cobalt text-paper">
@@ -111,23 +111,23 @@ export function WebhookArchitecture() {
 
             <div className="lg:col-span-9">
               <h2 className="max-w-3xl text-3xl font-medium leading-tight tracking-[-0.04em] md:text-5xl">
-                Events moving through a distributed processing pipeline.
+                Reliability made visible in the architecture.
               </h2>
 
               <p className="mt-6 max-w-2xl leading-7 text-paper/65">
-                A simplified public view of the architecture. Internal service
-                names, business logic, customer-specific flows, and proprietary
-                implementation details are intentionally omitted.
+                HTTP ingestion feeds a Kafka-compatible broker. Consumers persist
+                idempotent outcomes, retryable failures become durable scheduled
+                work, and permanent failures are routed to a dead-letter topic.
               </p>
             </div>
           </div>
 
           <div className="mt-16 overflow-x-auto border-y border-paper/20 py-12">
             <svg
-              viewBox="0 0 1320 450"
-              className="min-w-[1100px] w-full"
+              viewBox="0 0 1160 470"
+              className="w-full min-w-[980px]"
               role="img"
-              aria-label="Simplified distributed event processing architecture"
+              aria-label="Event processing platform architecture"
             >
               <defs>
                 <marker
@@ -145,9 +145,29 @@ export function WebhookArchitecture() {
                 </marker>
               </defs>
 
-              {/* Main pipeline */}
               <path
-                d="M230 182 H290"
+                d="M220 182 H275"
+                stroke="rgba(247,247,242,0.3)"
+                strokeWidth="1.5"
+                fill="none"
+                markerEnd="url(#arrow)"
+              />
+              <path
+                d="M425 182 H485"
+                stroke="rgba(247,247,242,0.3)"
+                strokeWidth="1.5"
+                fill="none"
+                markerEnd="url(#arrow)"
+              />
+              <path
+                d="M625 182 H685"
+                stroke="rgba(247,247,242,0.3)"
+                strokeWidth="1.5"
+                fill="none"
+                markerEnd="url(#arrow)"
+              />
+              <path
+                d="M830 182 H900"
                 stroke="rgba(247,247,242,0.3)"
                 strokeWidth="1.5"
                 fill="none"
@@ -155,7 +175,7 @@ export function WebhookArchitecture() {
               />
 
               <path
-                d="M420 182 H480"
+                d="M757 214 V315"
                 stroke="rgba(247,247,242,0.3)"
                 strokeWidth="1.5"
                 fill="none"
@@ -163,7 +183,7 @@ export function WebhookArchitecture() {
               />
 
               <path
-                d="M610 182 H670"
+                d="M977 214 V315"
                 stroke="rgba(247,247,242,0.3)"
                 strokeWidth="1.5"
                 fill="none"
@@ -171,31 +191,13 @@ export function WebhookArchitecture() {
               />
 
               <path
-                d="M810 182 H870"
+                d="M900 347 H850 C790 347 785 265 785 214"
                 stroke="rgba(247,247,242,0.3)"
                 strokeWidth="1.5"
                 fill="none"
                 markerEnd="url(#arrow)"
               />
 
-              <path
-                d="M1020 182 H1080"
-                stroke="rgba(247,247,242,0.3)"
-                strokeWidth="1.5"
-                fill="none"
-                markerEnd="url(#arrow)"
-              />
-
-              {/* Failure / alert path */}
-              <path
-                d="M945 214 V285 H945 V320"
-                stroke="rgba(247,247,242,0.3)"
-                strokeWidth="1.5"
-                fill="none"
-                markerEnd="url(#arrow)"
-              />
-
-              {/* Nodes */}
               {nodes.map((node) => (
                 <Node
                   key={node.id}
@@ -205,28 +207,20 @@ export function WebhookArchitecture() {
                   width={node.width}
                 />
               ))}
-            <circle
-             cx="545"
-             cy="142"
-             r="4"
-             fill="#ff5c1a"
-            />
-              {/* Event packets */}
+
               <motion.circle
                 r="5"
-                fill="#ff5c1a"
-                initial={{ cx: 230, cy: 182 }}
+                fill="#ff991c"
+                initial={{ cx: 220, cy: 182 }}
                 animate={{
-                  cx: [230, 290, 420, 480, 610, 670, 810, 870, 1020, 1080],
-                  cy: [182, 182, 182, 182, 182, 182, 182, 182, 182, 182],
+                  cx: [220, 275, 425, 485, 625, 685, 830, 900],
+                  cy: [182, 182, 182, 182, 182, 182, 182, 182],
                 }}
                 transition={
                   shouldReduceMotion
-                    ? {
-                        duration: 0,
-                      }
+                    ? { duration: 0 }
                     : {
-                        duration: 5,
+                        duration: 4.5,
                         repeat: Infinity,
                         ease: "linear",
                       }
@@ -235,44 +229,42 @@ export function WebhookArchitecture() {
 
               <motion.circle
                 r="4"
-                fill="#ff5c1a"
-                initial={{ cx: 230, cy: 182 }}
+                fill="#ff991c"
+                initial={{ cx: 757, cy: 214 }}
                 animate={{
-                  cx: [230, 290, 420, 480, 610, 670, 810, 870, 945, 945],
-                  cy: [182, 182, 182, 182, 182, 182, 182, 182, 182, 320],
+                  cx: [757, 757],
+                  cy: [214, 315],
                 }}
                 transition={
                   shouldReduceMotion
-                    ? {
-                        duration: 0,
-                      }
+                    ? { duration: 0 }
                     : {
-                        duration: 6,
+                        duration: 1.5,
                         repeat: Infinity,
+                        repeatDelay: 3,
                         ease: "linear",
-                        delay: 2,
                       }
                 }
               />
 
               <text
-                x="945"
-                y="395"
+                x="757"
+                y="418"
                 textAnchor="middle"
                 fill="rgba(247,247,242,0.45)"
                 fontSize="11"
                 fontFamily="var(--font-geist-mono)"
                 letterSpacing="1.3"
               >
-                FAILURE PATH
+                FAILURE / RETRY PATHS
               </text>
             </svg>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-x-8 gap-y-3 font-mono text-[10px] uppercase tracking-[0.15em] text-paper/45">
             <span>Orange = event flow</span>
-            <span>White = system boundary</span>
-            <span>Diagram intentionally simplified</span>
+            <span>Retry state is durable</span>
+            <span>Duplicates are expected</span>
           </div>
         </div>
       </div>
