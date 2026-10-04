@@ -1,20 +1,21 @@
+import type { Metadata } from "next";
+
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Container } from "@/components/ui/container";
 import { projects } from "@/content/projects/projects";
 import { ProjectRow } from "@/features/work/project-row";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Work",
   description:
-    "Selected backend, distributed systems, full-stack, and production engineering work by Jeanty Nassau.",
+    "Selected backend, distributed-systems, and full-stack work by Jeanty Nassau.",
 };
 
 export default function WorkPage() {
   return (
     <>
-      <Header theme="light"/>
+      <Header theme="light" />
 
       <main className="bg-paper text-ink">
         <section className="pb-20 pt-40 md:pb-28 md:pt-48">
@@ -28,13 +29,11 @@ export default function WorkPage() {
 
               <div className="lg:col-span-8">
                 <h1 className="max-w-4xl text-5xl font-medium leading-[0.94] tracking-[-0.05em] sm:text-6xl lg:text-8xl">
-                  Systems built to operate in the real world.
+                  Built to be used, tested, and inspected.
                 </h1>
 
                 <p className="mt-8 max-w-2xl text-lg leading-8 text-ink/60">
-                  Selected professional and personal engineering work across
-                  backend services, distributed systems, event processing, and
-                  product development.
+                  A backend reference platform and a full-stack product built for a real event.
                 </p>
               </div>
             </div>
