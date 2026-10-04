@@ -9,7 +9,7 @@ import { ExperimentCard } from "@/features/lab/experiment-card";
 export const metadata: Metadata = {
   title: "Lab",
   description:
-    "Three focused Three.js studies exploring mapped worlds, spatial media, and responsive surfaces.",
+    "Three focused Three.js studies: a mapped night-side globe, a rotating cinema, and an interactive signal terrain.",
 };
 
 export default function LabPage() {
@@ -33,8 +33,9 @@ export default function LabPage() {
                 </h1>
 
                 <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/65">
-                  A small set of interactive graphics experiments exploring
-                  worlds, spatial media, and responsive surfaces.
+                  Orbital Signals turns Earth into a moving signal object.
+                  Signal Theatre puts you inside a rotating four-screen cinema.
+                  Displacement Field responds to movement and click-driven pulses.
                 </p>
               </div>
             </div>
