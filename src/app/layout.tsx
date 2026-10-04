@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { SmoothScroll } from "@/components/motion/smooth-scroll";
+
 import { PageTransitionProvider } from "@/components/motion/page-transition-provider";
+import { SmoothScroll } from "@/components/motion/smooth-scroll";
+import { siteConfig } from "@/content/site";
+
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jeanty-nassau.vercel.com"),
+  metadataBase: new URL(siteConfig.url),
 
   title: {
     default: "Jeanty Nassau — Software Developer",
@@ -25,13 +28,26 @@ export const metadata: Metadata = {
   description:
     "Software Developer in Cape Town focused on backend systems, distributed systems, .NET, AWS, Kafka, PostgreSQL, and creative coding.",
 
+  alternates: {
+    canonical: "/",
+  },
+
   openGraph: {
     title: "Jeanty Nassau — Software Developer",
     description:
       "Backend and distributed systems engineer with a creative-coding side.",
+    url: "/",
     type: "website",
     locale: "en_ZA",
     siteName: "Jeanty Nassau",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Jeanty Nassau — Software Developer",
+      },
+    ],
   },
 
   twitter: {
@@ -39,6 +55,7 @@ export const metadata: Metadata = {
     title: "Jeanty Nassau — Software Developer",
     description:
       "Backend and distributed systems engineer with a creative-coding side.",
+    images: ["/opengraph-image"],
   },
 };
 
