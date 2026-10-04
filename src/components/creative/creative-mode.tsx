@@ -454,11 +454,14 @@ function SignalTheatre({
 const waveVertex = `
   uniform float uTime;
   uniform vec2 uPointer;
+  uniform vec2 uClickCenter;
+  uniform float uClickAge;
 
   varying vec2 vUv;
   varying float vHeight;
   varying float vPulse;
   varying float vSweep;
+  varying float vClickPulse;
 
   void main() {
     vec3 p = position;
@@ -469,6 +472,9 @@ const waveVertex = `
 
     float radial =
       distance(uv, pointerUv);
+
+    float clickRadial =
+      distance(uv, uClickCenter);
 
     float waveA =
       sin((p.x * 1.75) + uTime * 0.95) * 0.2;
@@ -482,13 +488,33 @@ const waveVertex = `
         uTime * 1.15
       ) * 0.11;
 
-    float ripple =
+    float pointerRipple =
       sin(
         radial * 34.0 -
         uTime * 3.3
       ) *
       exp(-radial * 5.4) *
-      0.28;
+      0.24;
+
+    float clickRadius =
+      max(uClickAge, 0.0) * 0.34;
+
+    float clickRing =
+      exp(
+        -pow(
+          (clickRadial - clickRadius) * 32.0,
+          2.0
+        )
+      ) *
+      exp(-max(uClickAge, 0.0) * 0.85);
+
+    float clickWave =
+      sin(
+        clickRadial * 46.0 -
+        uClickAge * 8.0
+      ) *
+      clickRing *
+      0.6;
 
     float sweepPhase =
       fract(uTime * 0.115);
@@ -503,12 +529,14 @@ const waveVertex = `
       waveA +
       waveB +
       diagonal +
-      ripple +
+      pointerRipple +
+      clickWave +
       sweep * 0.12;
 
     vHeight = p.z;
     vPulse = exp(-radial * 6.0);
     vSweep = sweep;
+    vClickPulse = clickRing;
 
     gl_Position =
       projectionMatrix *
@@ -524,6 +552,7 @@ const waveFragment = `
   varying float vHeight;
   varying float vPulse;
   varying float vSweep;
+  varying float vClickPulse;
 
   void main() {
     vec3 deep =
@@ -594,17 +623,22 @@ const waveFragment = `
     color +=
       vec3(1.0, 0.28, 0.02) *
       hotPeak *
-      0.55;
+      0.48;
 
     color +=
       vec3(1.0, 0.42, 0.04) *
       vPulse *
-      0.82;
+      0.72;
 
     color +=
       vec3(1.0, 0.5, 0.08) *
       vSweep *
-      0.95;
+      0.9;
+
+    color +=
+      vec3(1.0, 0.78, 0.25) *
+      vClickPulse *
+      1.65;
 
     float edgeFade =
       smoothstep(
@@ -632,6 +666,7 @@ const waveFragment = `
 const waveWireFragment = `
   varying float vPulse;
   varying float vSweep;
+  varying float vClickPulse;
 
   void main() {
     vec3 base =
@@ -639,7 +674,11 @@ const waveWireFragment = `
 
     vec3 pulse =
       vec3(1.0, 0.45, 0.05) *
-      (vPulse * 0.7 + vSweep * 0.55);
+      (
+        vPulse * 0.62 +
+        vSweep * 0.5 +
+        vClickPulse * 1.45
+      );
 
     gl_FragColor =
       vec4(base + pulse, 0.16);
@@ -653,14 +692,24 @@ function DisplacementField() {
     useRef<THREE.ShaderMaterial>(null);
   const wireMaterial =
     useRef<THREE.ShaderMaterial>(null);
+  const pulseCenter =
+    useRef(new THREE.Vector2(0.5, 0.5));
+  const pulseStartedAt =
+    useRef(-100);
 
-  const { pointer } = useThree();
+  const { gl, pointer } = useThree();
 
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
       uPointer: {
         value: new THREE.Vector2(),
+      },
+      uClickCenter: {
+        value: new THREE.Vector2(0.5, 0.5),
+      },
+      uClickAge: {
+        value: 100,
       },
     }),
     [],
@@ -676,44 +725,110 @@ function DisplacementField() {
     [],
   );
 
+  useEffect(() => {
+    const element = gl.domElement;
+
+    const handlePointerDown = (
+      event: PointerEvent,
+    ) => {
+      const rect =
+        element.getBoundingClientRect();
+
+      const x =
+        (event.clientX - rect.left) /
+        rect.width;
+
+      const y =
+        1 -
+        (event.clientY - rect.top) /
+        rect.height;
+
+      pulseCenter.current.set(x, y);
+      pulseStartedAt.current =
+        performance.now() / 1000;
+    };
+
+    element.addEventListener(
+      "pointerdown",
+      handlePointerDown,
+    );
+
+    return () => {
+      element.removeEventListener(
+        "pointerdown",
+        handlePointerDown,
+      );
+    };
+  }, [gl]);
+
   useFrame((state) => {
+    const now =
+      state.clock.elapsedTime;
+
+    const clickAge =
+      Math.max(
+        0,
+        performance.now() / 1000 -
+          pulseStartedAt.current,
+      );
+
     if (surfaceMaterial.current) {
       surfaceMaterial.current.uniforms.uTime.value =
-        state.clock.elapsedTime;
+        now;
 
       surfaceMaterial.current.uniforms.uPointer.value.set(
         pointer.x,
         pointer.y,
       );
+
+      surfaceMaterial.current.uniforms.uClickCenter.value.copy(
+        pulseCenter.current,
+      );
+
+      surfaceMaterial.current.uniforms.uClickAge.value =
+        clickAge;
     }
 
     if (wireMaterial.current) {
       wireMaterial.current.uniforms.uTime.value =
-        state.clock.elapsedTime;
+        now;
 
       wireMaterial.current.uniforms.uPointer.value.set(
         pointer.x,
         pointer.y,
       );
+
+      wireMaterial.current.uniforms.uClickCenter.value.copy(
+        pulseCenter.current,
+      );
+
+      wireMaterial.current.uniforms.uClickAge.value =
+        clickAge;
     }
 
     if (group.current) {
       group.current.rotation.z +=
-        (pointer.x * 0.1 -
+        (pointer.x * 0.16 -
           group.current.rotation.z) *
-        0.035;
+        0.04;
 
       group.current.rotation.x +=
-        (-0.86 -
-          pointer.y * 0.055 -
+        (-0.84 -
+          pointer.y * 0.085 -
           group.current.rotation.x) *
+        0.04;
+
+      group.current.position.x +=
+        (0.85 +
+          pointer.x * 0.22 -
+          group.current.position.x) *
         0.035;
 
       group.current.position.y +=
         (-0.5 -
-          pointer.y * 0.12 -
+          pointer.y * 0.2 -
           group.current.position.y) *
-        0.03;
+        0.035;
     }
   });
 
@@ -721,12 +836,12 @@ function DisplacementField() {
     <>
       <group
         ref={group}
-        rotation={[-0.86, 0, 0]}
-        position={[1.0, -0.5, 0]}
+        rotation={[-0.84, 0, 0]}
+        position={[0.85, -0.5, 0]}
       >
         <mesh>
           <planeGeometry
-            args={[7.8, 7.8, 180, 180]}
+            args={[8.1, 8.1, 190, 190]}
           />
 
           <shaderMaterial
@@ -739,9 +854,9 @@ function DisplacementField() {
           />
         </mesh>
 
-        <mesh position={[0, 0, 0.025]}>
+        <mesh position={[0, 0, 0.028]}>
           <planeGeometry
-            args={[7.8, 7.8, 84, 84]}
+            args={[8.1, 8.1, 90, 90]}
           />
 
           <shaderMaterial
