@@ -16,24 +16,42 @@ const stack = [
   "Three.js",
 ];
 
+const productionContext = [
+  {
+    value: "50–90M",
+    label: "Events / day",
+    detail: "Production ingestion systems I contribute to",
+  },
+  {
+    value: "1.3–1.5K",
+    label: "Events / sec",
+    detail: "Observed peak throughput",
+  },
+  {
+    value: "0.0011%",
+    label: "Exception rate",
+    detail: "Verified seven-day observation window",
+  },
+];
+
 const timeline = [
   {
     period: "2023 — 2025",
-    role: "Graduate / Learnership",
+    role: "Software Engineering Learner",
     description:
-      "Built backend services, automation, testing infrastructure, and gained production experience across .NET and cloud-based systems.",
+      "Built backend services and internal tools while learning end-to-end delivery across APIs, databases, Docker, cloud deployment, and CI/CD.",
   },
   {
     period: "2025 — 2026",
     role: "Junior Software Developer",
     description:
-      "Worked across production backend systems, event processing, data access, integrations, and reliability improvements.",
+      "Worked across production event processing, provider integrations, PostgreSQL data access, testing, and reliability improvements.",
   },
   {
     period: "2026 — Present",
     role: "Software Developer",
     description:
-      "Focused on backend and distributed systems, contributing to production services operating at significant event volume and scale.",
+      "Taking on larger architectural migrations, provider abstractions, production failure handling, and multi-service backend work.",
   },
 ];
 
@@ -64,11 +82,36 @@ export default function AboutPage() {
                 </h1>
 
                 <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/75">
-                  I&apos;m a software developer based in Cape Town, focused on
-                  backend systems, distributed architectures, and the
-                  engineering work required to keep software reliable at scale.
+                  I&apos;m a software developer based in Cape Town. My strongest
+                  work sits in backend systems where reliability, data flow,
+                  integrations, and change all meet.
                 </p>
               </div>
+            </div>
+          </Container>
+        </section>
+
+        <section className="bg-paper py-14 text-ink md:py-16">
+          <Container>
+            <div className="grid border-y border-ink/15 md:grid-cols-3">
+              {productionContext.map((item) => (
+                <div
+                  key={item.label}
+                  className="border-b border-ink/15 py-7 md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0"
+                >
+                  <p className="text-4xl font-medium tracking-[-0.045em] text-cobalt">
+                    {item.value}
+                  </p>
+
+                  <p className="mt-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
+                    {item.label}
+                  </p>
+
+                  <p className="mt-3 max-w-xs text-sm leading-6 text-ink/50">
+                    {item.detail}
+                  </p>
+                </div>
+              ))}
             </div>
           </Container>
         </section>
@@ -111,29 +154,30 @@ export default function AboutPage() {
               <div className="lg:col-span-7 lg:pt-8">
                 <div className="max-w-3xl space-y-8 text-xl leading-9 text-ink/70">
                   <p>
-                    Professionally, I spend most of my time working with .NET,
-                    event-driven systems, AWS, Kafka, PostgreSQL, integrations,
-                    and the kinds of problems that appear when software has to
-                    operate continuously in production.
+                    Professionally, I work mostly with C#/.NET, Kafka, AWS,
+                    PostgreSQL, integrations, and production systems that handle
+                    large event volumes continuously.
                   </p>
 
                   <p>
-                    Outside of work, I enjoy building products and experimenting
-                    with the more visual side of the web — Three.js, animation,
-                    interaction, and creative coding.
+                    Recent work has included a 95-file provider-integration
+                    migration, replacing a legacy data-access layer with a
+                    PostgreSQL/Dapper implementation and integration tests, and
+                    designing failure routing so critical Kafka consumer errors
+                    surface instead of disappearing into generic handling.
                   </p>
 
                   <p>
-                    I&apos;m particularly interested in becoming stronger at
-                    system design, distributed systems, and building software
-                    that remains understandable as it grows.
+                    Outside work, I build products and use the browser as a
+                    creative medium — Three.js, motion, interaction, and small
+                    systems that let me explore a different side of engineering.
                   </p>
                 </div>
 
                 <div className="mt-12 h-px w-28 bg-cobalt" />
 
                 <p className="mt-5 max-w-xl font-mono text-[11px] font-bold uppercase leading-6 tracking-[0.14em] text-orange">
-                  Production systems / distributed architecture / creative code
+                  Reliability / architecture / debugging / creative code
                 </p>
               </div>
             </div>
