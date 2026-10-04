@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { ReactNode } from "react";
 
+import { CreativeMode } from "@/components/creative/creative-mode";
 import { PageTransitionProvider } from "@/components/motion/page-transition-provider";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { siteConfig } from "@/content/site";
@@ -70,6 +71,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       >
         <SmoothScroll>
           <PageTransitionProvider>{children}</PageTransitionProvider>
+          <CreativeMode />
         </SmoothScroll>
       </body>
     </html>
