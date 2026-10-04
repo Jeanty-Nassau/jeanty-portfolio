@@ -14,7 +14,6 @@ type NotePageProps = {
 
 const noteModules = {
   "building-reliable-consumers": () =>
-    // @ts-expect-error MDX module types are provided by the Next.js loader.
     import("@/content/notes/building-reliable-consumers.mdx"),
 };
 
