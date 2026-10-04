@@ -5,6 +5,8 @@ export const siteConfig = {
 
   location: "Cape Town, South Africa",
 
+  url: "https://jeanty-nassau.vercel.com",
+
   socials: {
     github: "https://github.com/Jeanty-Nassau",
     linkedin: "https://www.linkedin.com/in/jeanty-nassau/",
