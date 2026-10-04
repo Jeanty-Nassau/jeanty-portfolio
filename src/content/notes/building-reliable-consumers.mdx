@@ -1,0 +1,31 @@
+Failures in distributed systems are inevitable.
+
+The useful question is not whether a consumer will fail, but whether the system makes that failure visible enough for someone to understand and act on it.
+
+## Generic errors hide useful information
+
+It is tempting to catch every downstream failure and convert it into one generic processing exception.
+
+That can make application code look cleaner, but it often removes information that operations actually need.
+
+If a downstream API returns a failure that should trigger an operational alert, that context needs to survive the path through the consumer.
+
+## Propagate meaning, not just exceptions
+
+A useful error path should preserve enough information to answer:
+
+- What failed?
+- Was it transient?
+- Should this be retried?
+- Is human intervention required?
+- Should an alert be raised?
+
+The goal is not to expose every internal exception.
+
+The goal is to retain the distinction between failures that mean different things operationally.
+
+## Observability is part of correctness
+
+A system that technically detects an error but makes it impossible to distinguish in production is only partially correct.
+
+Logs, metrics, traces, and alerting behaviour are part of the system contract too.
