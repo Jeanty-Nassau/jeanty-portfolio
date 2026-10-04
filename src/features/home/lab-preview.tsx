@@ -20,7 +20,7 @@ export function LabPreview() {
 
           <Reveal className="lg:col-span-8">
             <div>
-              <p className="font-mono text-xs uppercase tracking-[0.16em] text-orange">
+              <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-orange">
                 Creative studies
               </p>
 
@@ -38,23 +38,23 @@ export function LabPreview() {
                 {featuredExperiments.map((experiment, index) => (
                   <div
                     key={experiment.slug}
-                    className="grid gap-5 border-b border-paper/20 py-7 md:grid-cols-[60px_1fr_auto]"
+                    className="group grid gap-5 border-b border-paper/20 py-7 transition-all duration-300 hover:border-orange hover:bg-cobalt-dark hover:px-4 md:grid-cols-[60px_1fr_auto]"
                   >
-                    <span className="font-mono text-xs text-paper/35">
+                    <span className="font-mono text-xs font-bold text-paper/35 transition-colors duration-300 group-hover:text-orange">
                       {String(index + 1).padStart(2, "0")}
                     </span>
 
                     <div>
-                      <p className="text-xl font-medium tracking-[-0.025em]">
+                      <p className="text-xl font-medium tracking-[-0.025em] transition-transform duration-300 group-hover:translate-x-1">
                         {experiment.title}
                       </p>
 
-                      <p className="mt-2 max-w-xl text-sm leading-6 text-paper/55">
+                      <p className="mt-2 max-w-xl text-sm leading-6 text-paper/55 transition-colors duration-300 group-hover:text-paper/75">
                         {experiment.summary}
                       </p>
                     </div>
 
-                    <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-orange">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
                       {experiment.status}
                     </span>
                   </div>
@@ -64,9 +64,10 @@ export function LabPreview() {
               <div className="mt-14">
                 <Link
                   href="/lab"
-                  className="font-mono text-xs uppercase tracking-[0.16em] text-orange"
+                  className="group inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-orange transition-colors hover:text-paper"
                 >
-                  View the collection ↗
+                  View the collection
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">↗</span>
                 </Link>
               </div>
             </div>
