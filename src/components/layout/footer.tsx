@@ -17,6 +17,15 @@ export function Footer() {
               <p className="mt-2 text-sm text-paper/55">
                 Software Developer · Cape Town
               </p>
+
+              <a
+                href={siteConfig.socials.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-6 inline-flex border border-orange px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange transition-all hover:bg-orange hover:text-ink"
+              >
+                Reach out ↗
+              </a>
             </div>
 
             <div className="flex flex-wrap gap-x-8 gap-y-4 md:justify-end">
