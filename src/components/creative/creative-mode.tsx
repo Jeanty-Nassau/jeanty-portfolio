@@ -182,8 +182,7 @@ function OrbitalSignals() {
         maxDistance={10}
         minPolarAngle={Math.PI * 0.2}
         maxPolarAngle={Math.PI * 0.8}
-        autoRotate
-        autoRotateSpeed={0.35}
+        autoRotate={false}
         target={[0, 0, 0]}
       />
     </>
@@ -669,6 +668,7 @@ export function CreativeMode() {
         >
           <div className="absolute inset-0">
             <Canvas
+              key={study}
               camera={
                 study === "signal-theatre"
                   ? { position: [0, 0.1, 0.3], fov: 52 }
