@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Footer } from "@/components/layout/footer";
@@ -6,14 +7,12 @@ import { Container } from "@/components/ui/container";
 
 import { projects } from "@/content/projects/projects";
 import { webhookProcessingCaseStudy } from "@/content/projects/webhook-processing-platform";
+import { weddingWebAppCaseStudy } from "@/content/projects/wedding-web-app";
 
 import { CaseStudyMetrics } from "@/features/work/case-study-metrics";
 import { CaseStudySection } from "@/features/work/case-study-section";
 import { Contributions } from "@/features/work/contributions";
 import { WebhookArchitecture } from "@/features/work/webhook-architecture";
-
-import { weddingWebAppCaseStudy } from "@/content/projects/wedding-web-app";
-
 import { WeddingCaseStudy } from "@/features/work/wedding-case-study";
 
 type ProjectPageProps = {
@@ -21,6 +20,24 @@ type ProjectPageProps = {
     slug: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: ProjectPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const project = projects.find((item) => item.slug === slug);
+
+  if (!project) {
+    return {
+      title: "Project",
+    };
+  }
+
+  return {
+    title: project.title,
+    description: project.description,
+  };
+}
 
 export default async function ProjectPage({
   params,
@@ -42,10 +59,10 @@ export default async function ProjectPage({
     slug === weddingWebAppCaseStudy.projectSlug;
 
   const caseStudy = isWebhookCaseStudy
-  ? webhookProcessingCaseStudy
-  : isWeddingCaseStudy
-    ? weddingWebAppCaseStudy
-    : null;
+    ? webhookProcessingCaseStudy
+    : isWeddingCaseStudy
+      ? weddingWebAppCaseStudy
+      : null;
 
   return (
     <>
@@ -77,6 +94,32 @@ export default async function ProjectPage({
                 <p className="mt-8 max-w-3xl text-xl leading-9 text-ink/60">
                   {caseStudy?.intro ?? project.description}
                 </p>
+
+                {project.links && (
+                  <div className="mt-10 flex flex-wrap gap-3">
+                    {project.links.live && (
+                      <a
+                        href={project.links.live}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="border border-ink/20 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors hover:bg-ink hover:text-paper"
+                      >
+                        Live demo ↗
+                      </a>
+                    )}
+
+                    {project.links.github && (
+                      <a
+                        href={project.links.github}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="border border-ink/20 px-4 py-3 font-mono text-[11px] uppercase tracking-[0.14em] transition-colors hover:bg-ink hover:text-paper"
+                      >
+                        GitHub ↗
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </Container>
@@ -84,14 +127,10 @@ export default async function ProjectPage({
 
         <Container>
           {caseStudy?.metrics ? (
-            <CaseStudyMetrics
-              metrics={caseStudy.metrics}
-            />
+            <CaseStudyMetrics metrics={caseStudy.metrics} />
           ) : (
             project.metrics && (
-              <CaseStudyMetrics
-                metrics={project.metrics}
-              />
+              <CaseStudyMetrics metrics={project.metrics} />
             )
           )}
 
@@ -113,12 +152,12 @@ export default async function ProjectPage({
               ))}
             </div>
           </div>
-          </Container>
+        </Container>
 
-          {isWebhookCaseStudy && (
+        {isWebhookCaseStudy && (
           <>
             <WebhookArchitecture />
-                
+
             <Container>
               {webhookProcessingCaseStudy.sections.map((section) => (
                 <CaseStudySection
@@ -126,11 +165,11 @@ export default async function ProjectPage({
                   section={section}
                 />
               ))}
-        
+
               <Contributions
                 contributions={webhookProcessingCaseStudy.contributions}
               />
-        
+
               {webhookProcessingCaseStudy.disclaimer && (
                 <div className="border-t border-ink/15 py-10">
                   <p className="max-w-2xl font-mono text-[10px] uppercase leading-6 tracking-[0.14em] text-ink/40">
@@ -141,9 +180,8 @@ export default async function ProjectPage({
             </Container>
           </>
         )}
-        {isWeddingCaseStudy && (
-          <WeddingCaseStudy />
-        )}
+
+        {isWeddingCaseStudy && <WeddingCaseStudy />}
       </main>
 
       <Footer />

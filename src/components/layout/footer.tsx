@@ -26,28 +26,28 @@ export function Footer() {
               >
                 Work
               </Link>
-              
+
               <Link
                 href="/lab"
                 className="font-mono text-xs uppercase tracking-[0.15em]"
               >
                 Lab
               </Link>
-              
+
               <Link
                 href="/about"
                 className="font-mono text-xs uppercase tracking-[0.15em]"
               >
                 About
               </Link>
-              
+
               <Link
                 href="/notes"
                 className="font-mono text-xs uppercase tracking-[0.15em]"
               >
                 Notes
               </Link>
-              
+
               <a
                 href={siteConfig.socials.github}
                 target="_blank"
@@ -56,7 +56,7 @@ export function Footer() {
               >
                 GitHub ↗
               </a>
-              
+
               <a
                 href={siteConfig.socials.linkedin}
                 target="_blank"
@@ -64,13 +64,6 @@ export function Footer() {
                 className="font-mono text-xs uppercase tracking-[0.15em] text-orange"
               >
                 LinkedIn ↗
-              </a>
-              
-              <a
-                href={siteConfig.socials.email}
-                className="font-mono text-xs uppercase tracking-[0.15em] text-orange"
-              >
-                Email
               </a>
             </div>
           </div>

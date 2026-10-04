@@ -4,64 +4,59 @@ export const projects: Project[] = [
   {
     slug: "webhook-processing-platform",
 
-    title: "Webhook Processing Platform",
+    title: "Event Processing Platform",
 
     summary:
-      "High-throughput backend infrastructure for processing large volumes of event-driven workload reliably.",
+      "A durable asynchronous event-processing reference implementation focused on reliability and failure handling.",
 
     description:
-      "Backend services designed around asynchronous processing, reliability, observability, and high event throughput in a production fleet-telematics environment.",
+      "A public .NET reference implementation exploring at-least-once delivery, idempotency, delayed retries, dead-letter handling, partition ordering, observability, and integration testing.",
 
     category: "distributed-systems",
 
     technologies: [
       ".NET",
-      "AWS",
       "Kafka",
       "PostgreSQL",
+      "OpenTelemetry",
+      "Docker",
     ],
-
-    metrics: [
-      {
-        label: "Event volume",
-        value: "50–90M / day",
-      },
-      {
-        label: "Sustained throughput",
-        value: "1.3K–1.5K / sec",
-      },
-    ],
-
-    company: "Powerfleet",
 
     featured: true,
 
-    confidential: true,
+    links: {
+      github: "https://github.com/Jeanty-Nassau/event-processing-platform",
+    },
   },
 
   {
-  slug: "wedding-web-app",
+    slug: "wedding-web-app",
 
-  title: "Wedding Web App",
+    title: "Wedding Web App",
 
-  summary:
-    "A full-stack private-event platform combining authenticated guest workflows, RSVP management, and a highly interactive frontend experience.",
+    summary:
+      "A full-stack guest experience combining authenticated RSVP workflows, relational persistence, and an interaction-rich frontend.",
 
-  description:
-    "A real-world wedding application built with Next.js, TypeScript, Clerk, tRPC, Prisma, and PostgreSQL, with authenticated guest flows and a strong focus on interaction and visual polish.",
+    description:
+      "A real wedding application later converted into a recruiter-safe public demo with fictional guest data, strengthened authorization boundaries, automated testing, and CI.",
 
-  category: "full-stack",
+    category: "full-stack",
 
-  technologies: [
-    "Next.js",
-    "TypeScript",
-    "Clerk",
-    "tRPC",
-    "Prisma",
-    "PostgreSQL",
-    "Tailwind CSS",
-  ],
+    technologies: [
+      "Next.js",
+      "TypeScript",
+      "Clerk",
+      "tRPC",
+      "Prisma",
+      "PostgreSQL",
+      "Tailwind CSS",
+    ],
 
-  featured: true,
-},
+    featured: true,
+
+    links: {
+      live: "https://nassau-wedding.vercel.app/",
+      github: "https://github.com/Jeanty-Nassau/wedding-website",
+    },
+  },
 ];
