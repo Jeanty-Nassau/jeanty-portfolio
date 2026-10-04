@@ -5,7 +5,7 @@ const routes = [
   ["/work", /Built to be used, tested, and inspected/i],
   ["/work/webhook-processing-platform", /Event Processing Platform/i],
   ["/work/wedding-web-app", /Wedding Web App/i],
-  ["/lab", /Experiments that taught me how things move/i],
+  ["/lab", /Three studies\. Three distinct ideas\./i],
   ["/about", /I like building things that have to work/i],
   ["/notes", /Things worth thinking through in public/i],
 ] as const;
