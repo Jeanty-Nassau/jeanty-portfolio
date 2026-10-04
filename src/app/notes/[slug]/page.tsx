@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Footer } from "@/components/layout/footer";
@@ -16,6 +17,24 @@ const noteModules = {
     // @ts-expect-error MDX module types are provided by the Next.js loader.
     import("@/content/notes/building-reliable-consumers.mdx"),
 };
+
+export async function generateMetadata({
+  params,
+}: NotePageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const note = notes.find((item) => item.slug === slug);
+
+  if (!note) {
+    return {
+      title: "Note",
+    };
+  }
+
+  return {
+    title: note.title,
+    description: note.description,
+  };
+}
 
 export default async function NotePage({
   params,
