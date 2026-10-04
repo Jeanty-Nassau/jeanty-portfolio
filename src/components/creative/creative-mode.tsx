@@ -1,8 +1,7 @@
 "use client";
 
 import {
-  MeshReflectorMaterial,
-  OrbitControls,
+   OrbitControls,
   PerspectiveCamera,
   useTexture,
   useVideoTexture,
@@ -65,8 +64,8 @@ const studies: Array<{
     title: "Displacement Field",
     eyebrow: "THREE.JS STUDY / 03",
     description:
-      "A responsive surface study using displacement, pointer influence, light, and depth.",
-    hint: "Move the pointer to alter the field.",
+      "A radar-like signal terrain built from animated displacement, contour bands, scan energy, and pointer-driven pulses.",
+    hint: "Move the pointer to send a pulse through the field.",
   },
 ];
 
@@ -137,6 +136,7 @@ const earthVertex = `
 
 const earthFragment = `
   uniform sampler2D uMap;
+  uniform float uTime;
 
   varying vec2 vUv;
   varying vec3 vNormal;
@@ -189,6 +189,42 @@ const earthFragment = `
       rim *
       1.1;
 
+    float lon =
+      abs(fract(vUv.x * 18.0) - 0.5);
+
+    float lat =
+      abs(fract(vUv.y * 10.0) - 0.5);
+
+    float grid =
+      1.0 -
+      smoothstep(
+        0.455,
+        0.5,
+        min(lon, lat)
+      );
+
+    color +=
+      vec3(0.12, 0.32, 1.0) *
+      grid *
+      0.18;
+
+    float scanCenter =
+      fract(uTime * 0.055);
+
+    float scan =
+      1.0 -
+      smoothstep(
+        0.0,
+        0.035,
+        abs(vUv.y - scanCenter)
+      );
+
+    color +=
+      vec3(1.0, 0.38, 0.03) *
+      scan *
+      landMask *
+      1.25;
+
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -196,16 +232,22 @@ const earthFragment = `
 function OrbitalSignals() {
   const texture = useTexture(EARTH_TEXTURE);
   const earth = useRef<THREE.Mesh>(null);
+  const earthMaterial = useRef<THREE.ShaderMaterial>(null);
   const orbitRig = useRef<THREE.Group>(null);
 
   const uniforms = useMemo(
     () => ({
       uMap: { value: texture },
+      uTime: { value: 0 },
     }),
     [texture],
   );
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
+    if (earthMaterial.current) {
+      earthMaterial.current.uniforms.uTime.value =
+        state.clock.elapsedTime;
+    }
     if (earth.current) {
       earth.current.rotation.y += delta * 0.045;
     }
@@ -224,6 +266,7 @@ function OrbitalSignals() {
         <mesh ref={earth}>
           <sphereGeometry args={[2.05, 128, 128]} />
           <shaderMaterial
+            ref={earthMaterial}
             vertexShader={earthVertex}
             fragmentShader={earthFragment}
             uniforms={uniforms}
@@ -272,8 +315,22 @@ function OrbitalSignals() {
         </mesh>
 
         <mesh position={[2.65, 0.85, 0]}>
-          <sphereGeometry args={[0.055, 18, 18]} />
+          <sphereGeometry args={[0.07, 18, 18]} />
           <meshBasicMaterial color="#ff991c" />
+        </mesh>
+
+        <mesh position={[-2.45, -1.15, 0.35]}>
+          <sphereGeometry args={[0.045, 16, 16]} />
+          <meshBasicMaterial color="#91a7ff" />
+        </mesh>
+
+        <mesh rotation={[0.2, 1.15, 0.3]}>
+          <torusGeometry args={[3.7, 0.004, 8, 240]} />
+          <meshBasicMaterial
+            color="#ff991c"
+            transparent
+            opacity={0.2}
+          />
         </mesh>
       </group>
 
@@ -336,10 +393,6 @@ function SignalTheatre({
   const buildingSource = useTexture(
     `${CINEMA_ASSET_BASE}/building.jpeg`,
   );
-  const floorSource = useTexture(
-    `${CINEMA_ASSET_BASE}/floorTexture.jpg`,
-  );
-
   const building = useMemo(() => {
     const clone = buildingSource.clone();
     clone.colorSpace = THREE.SRGBColorSpace;
@@ -347,25 +400,14 @@ function SignalTheatre({
     return clone;
   }, [buildingSource]);
 
-  const floorTexture = useMemo(() => {
-    const clone = floorSource.clone();
-    clone.colorSpace = THREE.SRGBColorSpace;
-    clone.wrapS = THREE.RepeatWrapping;
-    clone.wrapT = THREE.RepeatWrapping;
-    clone.repeat.set(8, 8);
-    clone.needsUpdate = true;
-    return clone;
-  }, [floorSource]);
-
   useEffect(() => {
     return () => {
       building.dispose();
-      floorTexture.dispose();
     };
-  }, [building, floorTexture]);
+  }, [building]);
 
   const theatre = useRef<THREE.Group>(null);
-  const screenArc = Math.PI / 3.2;
+  const screenArc = Math.PI / 2 - 0.16;
 
   useFrame(() => {
     if (!theatre.current) return;
@@ -382,8 +424,8 @@ function SignalTheatre({
     <>
       <PerspectiveCamera
         makeDefault
-        position={[0, 0.38, 0]}
-        rotation={[-0.075, 0, 0]}
+        position={[0, 0.28, 0]}
+        rotation={[-0.09, 0, 0]}
         fov={fov}
         near={0.1}
         far={80}
@@ -427,16 +469,10 @@ function SignalTheatre({
       >
         <circleGeometry args={[4.95, 96]} />
 
-        <MeshReflectorMaterial
-          map={floorTexture}
-          color="#626878"
-          roughness={0.58}
-          metalness={0.16}
-          mirror={0.3}
-          blur={[220, 90]}
-          resolution={512}
-          mixBlur={1}
-          mixStrength={0.5}
+        <meshStandardMaterial
+          color="#11151f"
+          roughness={0.72}
+          metalness={0.1}
         />
       </mesh>
 
@@ -460,26 +496,61 @@ function SignalTheatre({
 const waveVertex = `
   uniform float uTime;
   uniform vec2 uPointer;
+
+  varying vec2 vUv;
   varying float vHeight;
+  varying float vPulse;
+  varying float vSweep;
 
   void main() {
     vec3 p = position;
-    float radial = distance(
-      uv,
-      vec2(0.5) + uPointer * 0.08
-    );
+    vUv = uv;
+
+    vec2 pointerUv =
+      vec2(0.5) + uPointer * 0.22;
+
+    float radial =
+      distance(uv, pointerUv);
 
     float waveA =
-      sin((p.x * 2.4) + uTime * 1.3) * 0.16;
+      sin((p.x * 1.75) + uTime * 0.95) * 0.2;
 
     float waveB =
-      cos((p.y * 3.0) - uTime * 0.95) * 0.12;
+      cos((p.y * 2.4) - uTime * 0.78) * 0.15;
+
+    float diagonal =
+      sin(
+        (p.x + p.y) * 1.9 -
+        uTime * 1.15
+      ) * 0.11;
 
     float ripple =
-      sin(radial * 28.0 - uTime * 2.3) * 0.09;
+      sin(
+        radial * 34.0 -
+        uTime * 3.3
+      ) *
+      exp(-radial * 5.4) *
+      0.28;
 
-    p.z += waveA + waveB + ripple;
+    float sweepPhase =
+      fract(uTime * 0.115);
+
+    float sweepDistance =
+      abs(uv.y - sweepPhase);
+
+    float sweep =
+      exp(-sweepDistance * 32.0);
+
+    p.z +=
+      waveA +
+      waveB +
+      diagonal +
+      ripple +
+      sweep * 0.12;
+
     vHeight = p.z;
+    vPulse = exp(-radial * 6.0);
+    vSweep = sweep;
 
     gl_Position =
       projectionMatrix *
@@ -489,80 +560,299 @@ const waveVertex = `
 `;
 
 const waveFragment = `
+  uniform float uTime;
+
+  varying vec2 vUv;
   varying float vHeight;
+  varying float vPulse;
+  varying float vSweep;
 
   void main() {
-    float mixAmount =
-      smoothstep(-0.3, 0.3, vHeight);
+    vec3 deep =
+      vec3(0.008, 0.016, 0.055);
 
-    vec3 low = vec3(0.04, 0.08, 0.22);
-    vec3 high = vec3(0.09, 0.28, 1.0);
+    vec3 cobalt =
+      vec3(0.025, 0.12, 0.68);
+
+    vec3 electric =
+      vec3(0.16, 0.42, 1.0);
+
+    float heightMix =
+      smoothstep(-0.55, 0.6, vHeight);
 
     vec3 color =
-      mix(low, high, mixAmount);
+      mix(deep, cobalt, heightMix);
+
+    color =
+      mix(
+        color,
+        electric,
+        smoothstep(0.12, 0.7, vHeight)
+      );
+
+    float contourPhase =
+      fract((vHeight + 0.65) * 8.5);
+
+    float contour =
+      1.0 -
+      smoothstep(
+        0.455,
+        0.5,
+        abs(contourPhase - 0.5)
+      );
+
+    color +=
+      vec3(0.5, 0.66, 1.0) *
+      contour *
+      0.2;
+
+    float gridX =
+      1.0 -
+      smoothstep(
+        0.47,
+        0.5,
+        abs(fract(vUv.x * 18.0) - 0.5)
+      );
+
+    float gridY =
+      1.0 -
+      smoothstep(
+        0.47,
+        0.5,
+        abs(fract(vUv.y * 12.0) - 0.5)
+      );
+
+    float grid =
+      max(gridX, gridY);
+
+    color +=
+      vec3(0.12, 0.25, 0.72) *
+      grid *
+      0.12;
+
+    float hotPeak =
+      smoothstep(0.22, 0.72, vHeight);
+
+    color +=
+      vec3(1.0, 0.28, 0.02) *
+      hotPeak *
+      0.55;
+
+    color +=
+      vec3(1.0, 0.42, 0.04) *
+      vPulse *
+      0.82;
+
+    color +=
+      vec3(1.0, 0.5, 0.08) *
+      vSweep *
+      0.95;
+
+    float edgeFade =
+      smoothstep(
+        0.02,
+        0.16,
+        min(
+          min(vUv.x, 1.0 - vUv.x),
+          min(vUv.y, 1.0 - vUv.y)
+        )
+      );
+
+    float flicker =
+      0.96 +
+      sin(uTime * 7.0 + vUv.x * 20.0) *
+      0.02;
 
     gl_FragColor =
-      vec4(color, 1.0);
+      vec4(
+        color * flicker,
+        edgeFade
+      );
+  }
+`;
+
+const waveWireFragment = `
+  varying float vPulse;
+  varying float vSweep;
+
+  void main() {
+    vec3 base =
+      vec3(0.3, 0.5, 1.0);
+
+    vec3 pulse =
+      vec3(1.0, 0.45, 0.05) *
+      (vPulse * 0.7 + vSweep * 0.55);
+
+    gl_FragColor =
+      vec4(base + pulse, 0.16);
   }
 `;
 
 function DisplacementField() {
-  const material = useRef<THREE.ShaderMaterial>(null);
-  const mesh = useRef<THREE.Mesh>(null);
+  const group =
+    useRef<THREE.Group>(null);
+  const surfaceMaterial =
+    useRef<THREE.ShaderMaterial>(null);
+  const wireMaterial =
+    useRef<THREE.ShaderMaterial>(null);
+
   const { pointer } = useThree();
 
+  const uniforms = useMemo(
+    () => ({
+      uTime: { value: 0 },
+      uPointer: {
+        value: new THREE.Vector2(),
+      },
+    }),
+    [],
+  );
+
+  const signalNodes = useMemo(
+    () => [
+      [-2.2, 1.45, 0.22] as const,
+      [1.7, 1.0, 0.18] as const,
+      [2.15, -1.25, 0.26] as const,
+      [-1.35, -1.55, 0.2] as const,
+    ],
+    [],
+  );
+
   useFrame((state) => {
-    if (material.current) {
-      material.current.uniforms.uTime.value =
+    if (surfaceMaterial.current) {
+      surfaceMaterial.current.uniforms.uTime.value =
         state.clock.elapsedTime;
 
-      material.current.uniforms.uPointer.value.set(
+      surfaceMaterial.current.uniforms.uPointer.value.set(
         pointer.x,
         pointer.y,
       );
     }
 
-    if (mesh.current) {
-      mesh.current.rotation.z +=
-        (pointer.x * 0.12 -
-          mesh.current.rotation.z) *
-        0.04;
+    if (wireMaterial.current) {
+      wireMaterial.current.uniforms.uTime.value =
+        state.clock.elapsedTime;
+
+      wireMaterial.current.uniforms.uPointer.value.set(
+        pointer.x,
+        pointer.y,
+      );
+    }
+
+    if (group.current) {
+      group.current.rotation.z +=
+        (pointer.x * 0.1 -
+          group.current.rotation.z) *
+        0.035;
+
+      group.current.rotation.x +=
+        (-0.86 -
+          pointer.y * 0.055 -
+          group.current.rotation.x) *
+        0.035;
+
+      group.current.position.y +=
+        (-0.5 -
+          pointer.y * 0.12 -
+          group.current.position.y) *
+        0.03;
     }
   });
 
   return (
     <>
-      <mesh
-        ref={mesh}
-        rotation={[-0.82, 0, 0]}
-        position={[1.1, -0.5, 0]}
+      <group
+        ref={group}
+        rotation={[-0.86, 0, 0]}
+        position={[1.0, -0.5, 0]}
       >
-        <planeGeometry args={[7.2, 7.2, 128, 128]} />
+        <mesh>
+          <planeGeometry
+            args={[7.8, 7.8, 180, 180]}
+          />
 
-        <shaderMaterial
-          ref={material}
-          vertexShader={waveVertex}
-          fragmentShader={waveFragment}
-          uniforms={{
-            uTime: { value: 0 },
-            uPointer: {
-              value: new THREE.Vector2(),
-            },
-          }}
-          wireframe
-        />
-      </mesh>
+          <shaderMaterial
+            ref={surfaceMaterial}
+            vertexShader={waveVertex}
+            fragmentShader={waveFragment}
+            uniforms={uniforms}
+            transparent
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        <mesh position={[0, 0, 0.025]}>
+          <planeGeometry
+            args={[7.8, 7.8, 84, 84]}
+          />
+
+          <shaderMaterial
+            ref={wireMaterial}
+            vertexShader={waveVertex}
+            fragmentShader={waveWireFragment}
+            uniforms={uniforms}
+            transparent
+            wireframe
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+
+        {signalNodes.map(
+          (position, index) => (
+            <group
+              key={index}
+              position={position}
+            >
+              <mesh>
+                <sphereGeometry
+                  args={[0.055, 18, 18]}
+                />
+
+                <meshBasicMaterial
+                  color={
+                    index % 2 === 0
+                      ? "#ff991c"
+                      : "#91a7ff"
+                  }
+                />
+              </mesh>
+
+              <mesh
+                rotation={[Math.PI / 2, 0, 0]}
+              >
+                <ringGeometry
+                  args={[0.11, 0.125, 32]}
+                />
+
+                <meshBasicMaterial
+                  color="#ff991c"
+                  transparent
+                  opacity={0.5}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+            </group>
+          ),
+        )}
+      </group>
 
       <pointLight
         position={[3, 4, 3]}
-        intensity={18}
+        intensity={16}
         color="#1847ff"
       />
 
       <pointLight
         position={[-3, -1, 2]}
-        intensity={10}
+        intensity={13}
         color="#ff991c"
+      />
+
+      <pointLight
+        position={[0, 1.5, 2]}
+        intensity={7}
+        color="#91a7ff"
       />
     </>
   );

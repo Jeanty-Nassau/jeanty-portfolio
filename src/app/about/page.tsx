@@ -19,18 +19,21 @@ const stack = [
 const timeline = [
   {
     period: "2023 — 2025",
+    company: "MiX Telematics",
     role: "Software Engineering Learner",
     description:
       "Built backend services and internal tools while learning end-to-end delivery across APIs, databases, Docker, cloud deployment, and CI/CD.",
   },
   {
     period: "2025 — 2026",
+    company: "Powerfleet",
     role: "Junior Software Developer",
     description:
       "Worked across production event processing, provider integrations, PostgreSQL data access, testing, and reliability improvements.",
   },
   {
     period: "2026 — Present",
+    company: "Powerfleet",
     role: "Software Developer",
     description:
       "Taking on larger architectural migrations, provider abstractions, production failure handling, and multi-service backend work.",
@@ -195,6 +198,10 @@ export default function AboutPage() {
                         </p>
 
                         <div>
+                          <p className="mb-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
+                            {item.company}
+                          </p>
+
                           <h2
                             className={[
                               "text-2xl font-medium tracking-[-0.03em] transition-colors duration-300 group-hover:text-paper",
