@@ -1,9 +1,10 @@
+import type { Metadata } from "next";
+
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Container } from "@/components/ui/container";
 import { labExperiments } from "@/content/lab/experiments";
 import { ExperimentCard } from "@/features/lab/experiment-card";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Lab",
@@ -28,7 +29,7 @@ export default function LabPage() {
 
               <div className="lg:col-span-8">
                 <h1 className="max-w-4xl text-5xl font-medium leading-[0.94] tracking-[-0.05em] sm:text-6xl lg:text-8xl">
-                  Experiments that don’t need a roadmap.
+                  Experiments that don&apos;t need a roadmap.
                 </h1>
 
                 <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/65">
@@ -40,21 +41,7 @@ export default function LabPage() {
             </div>
           </Container>
         </section>
-<section className="pb-20">
-  <Container>
-    <div className="aspect-[16/7] overflow-hidden border border-paper/20 bg-ink">
-      <div className="flex h-full items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-5 h-3 w-3 rounded-full bg-orange" />
 
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-paper/40">
-            Interactive work / visual experiments
-          </p>
-        </div>
-      </div>
-    </div>
-  </Container>
-</section>
         <section className="pb-28">
           <Container>
             {labExperiments.map((experiment, index) => (
