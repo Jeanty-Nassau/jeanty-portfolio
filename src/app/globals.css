@@ -96,6 +96,10 @@ a {
   text-decoration: none;
 }
 
+.text-orange {
+  font-weight: 700;
+}
+
 button,
 a {
   -webkit-tap-highlight-color: transparent;
