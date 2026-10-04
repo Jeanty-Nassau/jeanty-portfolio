@@ -110,6 +110,15 @@ export function Header({ theme = "dark" }: HeaderProps) {
               />
 
               <ThemeToggle />
+
+              <a
+                href="https://www.linkedin.com/in/jeanty-nassau/"
+                target="_blank"
+                rel="noreferrer"
+                className="border border-orange px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange transition-all hover:bg-orange hover:text-ink"
+              >
+                Reach out
+              </a>
             </div>
 
             <button
@@ -155,7 +164,18 @@ export function Header({ theme = "dark" }: HeaderProps) {
                 Cape Town / South Africa
               </p>
 
-              <ThemeToggle />
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+
+                <a
+                  href="https://www.linkedin.com/in/jeanty-nassau/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="border border-orange px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange transition-all hover:bg-orange hover:text-ink"
+                >
+                  Reach out
+                </a>
+              </div>
             </div>
           </Container>
         </div>
