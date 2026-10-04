@@ -88,8 +88,7 @@ export function LiveWeddingPreview() {
           </div>
 
           <p className="mt-5 font-mono text-[9px] font-semibold uppercase leading-5 tracking-[0.12em] text-paper/35">
-            Captured automatically from the deployed demo so the portfolio stays
-            in sync with the real product.
+            Real captures from the deployed public demo.
           </p>
         </div>
       </div>
