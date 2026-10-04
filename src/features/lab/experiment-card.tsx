@@ -10,7 +10,7 @@ export function ExperimentCard({
   index,
 }: ExperimentCardProps) {
   return (
-    <article className="group border-t border-paper/20 py-8">
+    <article className="border-t border-paper/20 py-9">
       <div className="grid gap-8 lg:grid-cols-12">
         <div className="font-mono text-xs text-paper/35 lg:col-span-1">
           {String(index + 1).padStart(2, "0")}
@@ -39,19 +39,18 @@ export function ExperimentCard({
           </div>
         </div>
 
-        <div className="flex items-start justify-between lg:col-span-2">
-          {experiment.status && (
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-orange">
-              {experiment.status}
-            </span>
+        <div className="space-y-2 lg:col-span-2 lg:text-right">
+          {experiment.year && (
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-paper/40">
+              {experiment.year}
+            </p>
           )}
 
-          <span
-            aria-hidden="true"
-            className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
-          >
-            ↗
-          </span>
+          {experiment.status && (
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-orange">
+              {experiment.status}
+            </p>
+          )}
         </div>
       </div>
     </article>
