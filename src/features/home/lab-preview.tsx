@@ -45,18 +45,48 @@ export function LabPreview() {
                     </span>
 
                     <div>
-                      <p className="text-xl font-medium tracking-[-0.025em] transition-transform duration-300 group-hover:translate-x-1">
-                        {experiment.title}
-                      </p>
+                      {experiment.repositoryUrl ? (
+                        <a
+                          href={experiment.repositoryUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-2 text-xl font-medium tracking-[-0.025em] transition-all duration-300 group-hover:translate-x-1 group-hover:text-orange"
+                        >
+                          {experiment.title}
+                          <span
+                            className="font-mono text-xs text-orange"
+                            aria-hidden="true"
+                          >
+                            ↗
+                          </span>
+                        </a>
+                      ) : (
+                        <p className="text-xl font-medium tracking-[-0.025em] transition-transform duration-300 group-hover:translate-x-1">
+                          {experiment.title}
+                        </p>
+                      )}
 
                       <p className="mt-2 max-w-xl text-sm leading-6 text-paper/55 transition-colors duration-300 group-hover:text-paper/75">
                         {experiment.summary}
                       </p>
                     </div>
 
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
-                      {experiment.status}
-                    </span>
+                    <div className="flex items-center gap-4 md:justify-end">
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-orange">
+                        {experiment.status}
+                      </span>
+
+                      {experiment.repositoryUrl && (
+                        <a
+                          href={experiment.repositoryUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-paper/55 transition-colors hover:text-orange"
+                        >
+                          GitHub ↗
+                        </a>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
