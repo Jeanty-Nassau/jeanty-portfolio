@@ -10,6 +10,8 @@ export const labExperiments: LabExperiment[] = [
     year: "2022 / 2026",
     status: "complete",
     featured: true,
+    repositoryUrl:
+      "https://github.com/Jeanty-Nassau/Interactive-World-ThreeJS",
   },
   {
     slug: "signal-theatre",
@@ -20,6 +22,8 @@ export const labExperiments: LabExperiment[] = [
     year: "2022 / 2026",
     status: "complete",
     featured: true,
+    repositoryUrl:
+      "https://github.com/Jeanty-Nassau/Interactive-CylinderCinema-ThreeJS",
   },
   {
     slug: "displacement-field",
@@ -30,5 +34,7 @@ export const labExperiments: LabExperiment[] = [
     year: "2022 / 2026",
     status: "complete",
     featured: true,
+    repositoryUrl:
+      "https://github.com/Jeanty-Nassau/Interactive-Terrain-ThreeJS",
   },
 ];
