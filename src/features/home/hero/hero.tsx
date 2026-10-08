@@ -11,10 +11,16 @@ export function Hero() {
           right-[-10%]
           top-[49%]
           z-[5]
-          hidden
+          block
           -translate-y-1/2
-          md:block
+          right-[-24%]
+          top-[62%]
+          opacity-45
+          sm:right-[-12%]
+          sm:top-[57%]
+          sm:opacity-60
           md:right-[-16%]
+          md:top-[49%]
           md:opacity-80
           lg:right-[-8%]
           lg:opacity-100

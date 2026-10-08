@@ -9,6 +9,7 @@ import {
 } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
+  Suspense,
   useEffect,
   useMemo,
   useRef,
@@ -944,6 +945,32 @@ function DisplacementField() {
   );
 }
 
+function StudyLoading() {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[4] grid place-items-center bg-ink/70 backdrop-blur-sm">
+      <div className="w-[min(18rem,72vw)]">
+        <div className="mb-3 flex items-center justify-between font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-paper/60">
+          <span>Loading study</span>
+          <span className="text-orange">WebGL</span>
+        </div>
+
+        <div className="relative h-px overflow-hidden bg-paper/15">
+          <span className="loading-line absolute inset-y-0 left-0 w-1/3 bg-orange" />
+        </div>
+
+        <div className="loading-grid mt-4 grid grid-cols-6 gap-1 opacity-40" aria-hidden="true">
+          {Array.from({ length: 18 }).map((_, index) => (
+            <span
+              key={index}
+              className="aspect-square border border-paper/15"
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function StudyScene({
   study,
   cinemaScreen,
@@ -981,6 +1008,8 @@ export function CreativeMode() {
     useState(0);
   const [cinemaFov, setCinemaFov] =
     useState(68);
+  const [studyLoading, setStudyLoading] =
+    useState(false);
 
   const selected =
     studies.find((item) => item.id === study) ??
@@ -1037,12 +1066,27 @@ export function CreativeMode() {
     );
   }
 
+  function switchStudy(nextStudy: StudyId) {
+    if (nextStudy === study) {
+      return;
+    }
+
+    setStudyLoading(true);
+    setStudy(nextStudy);
+    setCinemaScreen(0);
+    setCinemaFov(68);
+
+    window.setTimeout(() => {
+      setStudyLoading(false);
+    }, 650);
+  }
+
   return (
     <>
       <button
         type="button"
         onClick={() => setActive(true)}
-        className="fixed bottom-5 left-5 z-[70] hidden items-center gap-2 border border-paper/25 bg-ink/85 px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-paper backdrop-blur-md transition-all hover:border-orange hover:bg-orange hover:text-ink md:inline-flex"
+        className="fixed bottom-4 left-4 z-[70] inline-flex items-center gap-2 border border-paper/25 bg-ink/85 px-3 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-paper backdrop-blur-md transition-all hover:border-orange hover:bg-orange hover:text-ink md:bottom-5 md:left-5 md:px-4 md:py-3 md:text-[10px]"
         aria-haspopup="dialog"
       >
         <span className="h-1.5 w-1.5 rounded-full bg-orange" />
@@ -1082,32 +1126,36 @@ export function CreativeMode() {
                 args={["#05070b"]}
               />
 
-              <StudyScene
-                study={study}
-                cinemaScreen={cinemaScreen}
-                cinemaFov={cinemaFov}
-              />
+              <Suspense fallback={null}>
+                <StudyScene
+                  study={study}
+                  cinemaScreen={cinemaScreen}
+                  cinemaFov={cinemaFov}
+                />
+              </Suspense>
             </Canvas>
+
+            {studyLoading && <StudyLoading />}
           </div>
 
-          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,7,11,0.94)_0%,rgba(5,7,11,0.5)_24%,rgba(5,7,11,0.08)_44%,transparent_58%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,7,11,0.9)_0%,rgba(5,7,11,0.18)_38%,transparent_58%,rgba(5,7,11,0.7)_100%)] md:bg-[linear-gradient(90deg,rgba(5,7,11,0.94)_0%,rgba(5,7,11,0.5)_24%,rgba(5,7,11,0.08)_44%,transparent_58%)]" />
 
-          <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-5 md:p-8">
+          <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4 md:p-8">
             <div className="flex items-start justify-between gap-6">
-              <div className="max-w-md">
+              <div className="max-w-[16rem] sm:max-w-sm md:max-w-md">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-orange">
                   {selected.eyebrow}
                 </p>
 
-                <h2 className="mt-3 text-4xl font-medium leading-[0.9] tracking-[-0.055em] md:text-6xl">
+                <h2 className="mt-2 text-3xl font-medium leading-[0.9] tracking-[-0.055em] sm:text-4xl md:mt-3 md:text-6xl">
                   {selected.title}
                 </h2>
 
-                <p className="mt-4 max-w-sm text-sm leading-6 text-paper/60">
+                <p className="mt-3 hidden max-w-sm text-sm leading-6 text-paper/60 sm:block md:mt-4">
                   {selected.description}
                 </p>
 
-                <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.13em] text-orange">
+                <p className="mt-2 font-mono text-[9px] font-bold uppercase tracking-[0.13em] text-orange md:mt-3 md:text-[10px]">
                   {selected.hint}
                 </p>
               </div>
@@ -1115,14 +1163,14 @@ export function CreativeMode() {
               <button
                 type="button"
                 onClick={() => setActive(false)}
-                className="pointer-events-auto border border-paper/25 bg-ink/70 px-4 py-3 font-mono text-[10px] font-bold uppercase tracking-[0.15em] transition-all hover:border-orange hover:bg-orange hover:text-ink"
+                className="pointer-events-auto border border-paper/25 bg-ink/70 px-3 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] transition-all hover:border-orange hover:bg-orange hover:text-ink md:px-4 md:py-3 md:text-[10px]"
               >
                 Close / Esc
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div className="pointer-events-auto flex flex-wrap items-center gap-2">
+            <div className="flex max-h-[42vh] flex-col gap-3 overflow-y-auto md:max-h-none md:flex-row md:items-end md:justify-between md:overflow-visible">
+              <div className="pointer-events-auto flex flex-wrap items-center gap-1.5 md:gap-2">
                 {study === "signal-theatre" && (
                   <>
                     <button
@@ -1188,11 +1236,7 @@ export function CreativeMode() {
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => {
-                      setStudy(item.id);
-                      setCinemaScreen(0);
-                      setCinemaFov(68);
-                    }}
+                    onClick={() => switchStudy(item.id)}
                     className={[
                       "shrink-0 border px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.13em] transition-all",
                       item.id === study

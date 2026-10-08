@@ -6,4 +6,5 @@ export type LabExperiment = {
   year?: string;
   status?: "complete" | "ongoing";
   featured?: boolean;
+  repositoryUrl?: string;
 };

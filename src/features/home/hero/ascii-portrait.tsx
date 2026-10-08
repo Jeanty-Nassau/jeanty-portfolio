@@ -822,9 +822,10 @@ export function AsciiPortrait() {
       aria-hidden="true"
       className="
         block
-        cursor-crosshair
-        pointer-events-auto
-        touch-none
+        pointer-events-none
+        md:pointer-events-auto
+        md:cursor-crosshair
+        md:touch-none
       "
       style={{
         width: `${size}px`,
