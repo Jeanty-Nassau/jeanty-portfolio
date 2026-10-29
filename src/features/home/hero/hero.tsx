@@ -8,8 +8,6 @@ export function Hero() {
       <div
         className="
           absolute
-          right-[-10%]
-          top-[49%]
           z-[5]
           block
           -translate-y-1/2
@@ -35,7 +33,7 @@ export function Hero() {
         <div className="grid flex-1 items-center pb-20 pt-[var(--header-height)] lg:grid-cols-12">
           <div className="relative z-20 lg:col-span-8">
             <p className="mb-6 text-md font-bold uppercase tracking-[0.18em] text-orange">
-              Backend / Distributed Systems / Creative Code
+              Software Development Engineer / C# .NET / AWS
             </p>
 
             <h1 className="max-w-5xl text-[clamp(3.5rem,8vw,8.5rem)] font-bold leading-[0.84] tracking-[-0.065em]">
@@ -45,9 +43,9 @@ export function Hero() {
             </h1>
 
             <p className="mt-10 max-w-2xl text-lg leading-8 text-paper/85 md:text-xl">
-              Software developer working on .NET, Kafka, AWS, and PostgreSQL
-              systems in production. Outside work, I build complete products
-              and interactive graphics experiments.
+              I build C#/.NET services on AWS — from distributed scheduling
+              to event-driven systems. Outside work, I build products and
+              interactive Three.js studies.
             </p>
           </div>
         </div>

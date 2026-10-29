@@ -23,15 +23,13 @@ export function AboutPreview() {
 
               <div className="mt-10 grid gap-8 md:grid-cols-2">
                 <p className="leading-8 text-paper/70">
-                  I&apos;m a software developer based in Cape Town, focused on
-                  backend systems, distributed architectures, and the engineering
-                  challenges that appear when software operates at scale.
+                  At Powerfleet, I build C#/.NET backend systems across
+                  distributed scheduling, Kafka, AWS, and PostgreSQL.
                 </p>
 
                 <p className="leading-8 text-paper/70">
-                  Outside of production systems, I use the web as a creative
-                  medium — experimenting with graphics, interaction, motion, and
-                  small products of my own.
+                  Outside work, I build complete products and interactive
+                  Three.js experiments.
                 </p>
               </div>
 
