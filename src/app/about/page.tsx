@@ -6,44 +6,44 @@ import { Header } from "@/components/layout/header";
 import { Container } from "@/components/ui/container";
 
 const stack = [
-  ".NET",
   "C#",
+  ".NET",
   "AWS",
   "Kafka",
   "PostgreSQL",
+  "Valkey / Redis",
+  "Docker",
   "TypeScript",
-  "Next.js",
-  "Three.js",
 ];
 
 const timeline = [
   {
-    period: "2023 — 2025",
+    period: "Feb 2023 — Jan 2025",
     company: "MiX Telematics",
-    role: "Software Engineering Learner",
+    role: "Learner — Test Automation Developer",
     description:
-      "Built backend services and internal tools while learning end-to-end delivery across APIs, databases, Docker, cloud deployment, and CI/CD.",
+      "Built Playwright/Selenium regression tests and C#/.NET + Angular features for internal tools.",
   },
   {
-    period: "2025 — 2026",
+    period: "Feb 2025 — Jul 2026",
     company: "Powerfleet",
     role: "Junior Software Developer",
     description:
-      "Worked across production event processing, provider integrations, PostgreSQL data access, testing, and reliability improvements.",
+      "Owned a greenfield engineering analytics service and worked on high-volume Kafka services, integrations, and PostgreSQL data access.",
   },
   {
-    period: "2026 — Present",
+    period: "Jul 2026 — Present",
     company: "Powerfleet",
     role: "Software Developer",
     description:
-      "Taking on larger architectural migrations, provider abstractions, production failure handling, and multi-service backend work.",
+      "Building distributed scheduling, audit APIs, telemetry, and provider-agnostic backend services.",
   },
 ];
 
 export const metadata: Metadata = {
   title: "About",
   description:
-    "About Jeanty Nassau, a software developer focused on backend and distributed systems.",
+    "About Jeanty Nassau, a software development engineer focused on C#/.NET, AWS, and distributed systems.",
 };
 
 export default function AboutPage() {
@@ -67,9 +67,8 @@ export default function AboutPage() {
                 </h1>
 
                 <p className="mt-8 max-w-2xl text-lg leading-8 text-paper/75">
-                  I&apos;m a software developer based in Cape Town. My strongest
-                  work sits in backend systems where reliability, data flow,
-                  integrations, and change all meet.
+                  Software Development Engineer in Cape Town, focused on
+                  backend systems, reliability, and distributed workloads.
                 </p>
               </div>
             </div>
@@ -105,39 +104,35 @@ export default function AboutPage() {
                     </span>
 
                     <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-cobalt">
-                      Builder / Engineer
+                      Backend / Systems
                     </span>
                   </figcaption>
                 </figure>
               </div>
 
               <div className="lg:col-span-7 lg:pt-8">
-                <div className="max-w-3xl space-y-8 text-xl leading-9 text-ink/70">
+                <div className="max-w-3xl space-y-7 text-xl leading-9 text-ink/70">
                   <p>
-                    Professionally, I work mostly with C#/.NET, Kafka, AWS,
-                    PostgreSQL, integrations, and production systems that handle
-                    large event volumes continuously.
+                    At Powerfleet, I build C#/.NET services across distributed
+                    scheduling, Kafka, AWS, PostgreSQL, and production operations.
                   </p>
 
                   <p>
-                    Recent work has included a 95-file provider-integration
-                    migration, replacing a legacy data-access layer with a
-                    PostgreSQL/Dapper implementation and integration tests, and
-                    designing failure routing so critical Kafka consumer errors
-                    surface instead of disappearing into generic handling.
+                    Recent work includes a fault-tolerant scheduler using Valkey
+                    leases and fencing tokens, plus a greenfield engineering
+                    analytics service taken from design through deployment.
                   </p>
 
                   <p>
-                    Outside work, I build products and use the browser as a
-                    creative medium — Three.js, motion, interaction, and small
-                    systems that let me explore a different side of engineering.
+                    Outside work, I build full-stack products and interactive
+                    Three.js studies.
                   </p>
                 </div>
 
                 <div className="mt-12 h-px w-28 bg-cobalt" />
 
                 <p className="mt-5 max-w-xl font-mono text-[11px] font-bold uppercase leading-6 tracking-[0.14em] text-orange">
-                  Reliability / architecture / debugging / creative code
+                  Distributed systems / reliability / testing / creative code
                 </p>
               </div>
             </div>
@@ -186,7 +181,7 @@ export default function AboutPage() {
                     return (
                       <article
                         key={item.period}
-                        className="group grid gap-6 border-b border-ink/15 py-8 transition-all duration-300 hover:border-cobalt hover:bg-cobalt hover:px-5 md:grid-cols-[160px_1fr]"
+                        className="group grid gap-6 border-b border-ink/15 py-8 transition-all duration-300 hover:border-cobalt hover:bg-cobalt hover:px-5 md:grid-cols-[180px_1fr]"
                       >
                         <p
                           className={[
