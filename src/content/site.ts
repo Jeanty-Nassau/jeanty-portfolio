@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "Jeanty Nassau",
 
-  role: "Software Developer",
+  role: "Software Development Engineer",
 
   location: "Cape Town, South Africa",
 
